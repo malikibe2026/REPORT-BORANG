@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Berpages BE2026 – Unit Harga-Harga</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--navy:#0a1628;--navy2:#0f2044;--blue2:#2563eb;--accent:#38bdf8;--gold:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;--cyan:#06b6d4;--bg:#e7edf6;--card:#fff;--border:#d3dcea;--text:#1e2d4a;--muted:#64748b;--font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);padding:18px 0}
+
+/* CONTROL BAR (no print) */
+.bar{position:sticky;top:0;z-index:50;background:#0f2044;color:#fff;padding:10px 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:-18px 0 18px}
+.bar .t{font-weight:800;letter-spacing:.03em;font-size:.92rem;margin-right:8px}
+.bar label{font-size:.68rem;font-weight:700;color:#9fb2d4;text-transform:uppercase;letter-spacing:.05em;margin-left:6px}
+.bar select{border:1px solid #2a3c63;border-radius:7px;padding:5px 10px;font-size:.78rem;font-family:var(--font);background:#16264a;color:#fff;cursor:pointer}
+.bar input{border:1px solid #2a3c63;border-radius:7px;padding:5px 10px;font-size:.72rem;font-family:var(--mono);background:#16264a;color:#fff;width:200px;max-width:48vw}
+.bar .sp{flex:1}
+.btn{background:var(--blue2);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:.78rem;font-weight:600;cursor:pointer}
+.btn:hover{background:#1a4fad}.btn.alt{background:#fff;color:#0f2044}.btn.gh{background:transparent;border:1px solid #2a3c63;color:#cdd8ec}
+
+/* PAGE */
+.page{width:min(210mm,100%);min-height:292mm;background:var(--card);margin:0 auto 18px;padding:16mm 14mm;box-shadow:0 6px 30px rgba(10,22,40,.14);position:relative}
+.rpt-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--navy2);padding-bottom:12px;margin-bottom:18px}
+.rpt-head .l h1{font-size:1.18rem;font-weight:800;color:var(--navy2);line-height:1.2}
+.rpt-head .l p{font-size:.76rem;color:var(--muted);margin-top:4px;letter-spacing:.03em}
+.rpt-head .r{text-align:right;font-size:.72rem;color:var(--muted)}
+.rpt-head .r .tag{display:inline-block;background:var(--navy2);color:#fff;border-radius:14px;padding:3px 12px;font-size:.7rem;font-weight:700;letter-spacing:.04em;margin-bottom:5px}
+.rpt-head .r .scope{font-family:var(--mono);color:var(--blue2);font-weight:600}
+.sec-h{font-size:.95rem;font-weight:800;color:var(--navy2);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 12px;padding-left:10px;border-left:4px solid var(--blue2)}
+.note{font-size:.72rem;color:var(--muted);margin:10px 0 0;line-height:1.6}
+.foot{position:absolute;bottom:9mm;left:14mm;right:14mm;border-top:1px solid var(--border);padding-top:6px;display:flex;justify-content:space-between;font-size:.66rem;color:var(--muted)}
+
+/* SUMMARY CARDS */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}
+.sc{border:1px solid var(--border);border-radius:10px;padding:13px 14px;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--blue2)}
+.sc.g::after{background:var(--green)}.sc.gd::after{background:var(--gold)}.sc.r::after{background:var(--red)}.sc.p::after{background:var(--purple)}.sc.c::after{background:var(--cyan)}.sc.a::after{background:var(--accent)}
+.sc .lab{font-size:.66rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.sc .val{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--navy)}
+.sc .s{font-size:.66rem;color:var(--muted);margin-top:4px}
+
+/* TABLE */
+table.rt{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:4px}
+table.rt th{background:var(--navy2);color:#fff;font-weight:700;padding:7px 7px;text-align:center;font-size:.64rem;letter-spacing:.02em;text-transform:uppercase;border:1px solid #24365c;line-height:1.25}
+table.rt th.l,table.rt td.l{text-align:left}
+table.rt td{padding:6px 7px;border:1px solid #e6ebf4;text-align:right;font-family:var(--mono)}
+table.rt td.l{font-family:var(--font)}
+table.rt tbody tr:nth-child(even) td{background:#f7f9fd}
+table.rt tr.sub td{background:#eef3fb;font-weight:700}
+table.rt tr.tot td{background:#dde8fb;font-weight:800;color:var(--navy2);border-top:2px solid var(--navy2)}
+table.rt .hl{background:#1a4fad!important;color:#fff}
+.chart-box{height:240px;margin-top:10px}
+.legend{font-size:.68rem;color:var(--muted);margin-top:8px}
+#load{position:fixed;inset:0;background:rgba(10,22,40,.72);display:flex;align-items:center;justify-content:center;z-index:9999;color:#fff;font-size:.9rem;flex-direction:column;gap:14px}
+.sp{width:42px;height:42px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#err{display:none;max-width:760px;margin:30px auto;background:#fff5f5;border:1px solid #fed7d7;color:#9b2c2c;border-radius:12px;padding:18px 22px;font-size:.85rem}
+
+@media print{
+  body{background:#fff;padding:0}.bar{display:none}
+  .page{box-shadow:none;margin:0;width:auto;min-height:auto;padding:12mm 10mm;break-after:page}
+  .page:last-child{break-after:auto}
+  .foot{position:fixed}
+}
+@page{size:A4;margin:8mm}
+@media(max-width:760px){.sgrid{grid-template-columns:repeat(2,1fr)}.page{padding:14px}}
+</style>
+</head>
+<body>
+
+<div id="load"><div class="sp"></div><div>Memuatkan data BE2026...</div></div>
+
+<div class="bar">
+  <span class="t">📄 LAPORAN BERPAGES BE2026</span>
+  <label>Fasa</label><select id="f-fasa" onchange="render()"><option value="">Semua</option><option value="2">Fasa 2</option><option value="3">Fasa 3</option></select>
+  <label>Survei</label><select id="f-survei" onchange="render()"><option value="">Semua</option><option value="Hartanah">Hartanah</option><option value="Runcit">Runcit</option></select>
+  <label>Penyelia</label><select id="f-pen" onchange="render()"><option value="">Semua</option></select>
+  <span class="sp"></span>
+  <button class="btn alt" onclick="window.print()">🖨️ Simpan PDF</button>
+  <a href="index.html" class="btn gh" style="text-decoration:none">← Dashboard</a>
+  <input type="text" id="url" placeholder="URL CSV ..."><button class="btn" onclick="loadData()">⟳ Muat</button><button class="btn gh" onclick="loadDemo()">Demo</button>
+</div>
+
+<div id="report"></div>
+<div id="err">⚠️ Tiada data. Pastikan URL CSV sah & helaian "Publish to web", atau klik <b>Demo</b>.</div>
+
+<script>
+const COL={FASA:0,NO_SIRI:1,PENYELIA:2,FE:3,L_KAWALAN:11,M_BATCHING:12,N_NO_BATCH:13,O_PROSESAN:14,P_RESP:15,Q_REKOD:16,
+  K5:{17:'Hasil / Pendapatan',18:'Perbelanjaan',19:'Gaji',20:'Pekerja',21:'Aset',22:'Stok'},AP_SURVEI:41};
+const DEFAULT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSUeV4tfzv1ErhjT3e3o7P1lRO42zXMBb76TBHmUDe7lFHqS313TRIxol6nboeQIqYBsxo4FQrBdP8u/pub?gid=998975185&single=true&output=csv';
+let rawRows=[],curRows=[],k5chart=null;
+
+const fmt=n=>(n==null||isNaN(n))?'0':Number(n).toLocaleString('ms-MY');
+const rm=n=>'RM '+fmt(Math.round(n));
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const pct1=(a,b)=>b?(Math.round(a/b*1000)/10):0;
+function feName(r){return String(r[COL.FE]||'').trim()||'Tidak Dikenali';}
+function penName(r){return String(r[COL.PENYELIA]||'').trim()||'(Tiada)';}
+function fasaOf(r){const v=String(r[COL.FASA]||'');if(/fasa\s*2/i.test(v))return '2';if(/fasa\s*3/i.test(v))return '3';return v.trim()||'(lain)';}
+function surveiOf(r){const m=String(r[COL.AP_SURVEI]||'').match(/(\d{3})/);const c=m?m[1]:'';return c==='308'?'Hartanah':c==='337'?'Runcit':'(Lain)';}
+function rcode(r){const m=String(r[COL.P_RESP]||'').match(/^\s*(\d+)/);return m?parseInt(m[1],10):null;}
+function rgroup(r){const c=rcode(r);if(c===null)return 'belum';if(c===11)return 'k11';if(c===50)return 'k50';if(c>=12&&c<=60)return 'lk';return 'kodb';}
+function rekodOf(r){return String(r[COL.Q_REKOD]||'').trim();}
+const MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,mac:2,mei:4,ogo:7,ogos:7,dis:11};
+function pd(s){if(!s)return null;s=String(s).trim();if(!s)return null;let m=s.match(/^(\d{1,2})[-\/ ]([A-Za-z]{3,})[-\/ ](\d{2,4})$/);if(m){const d=+m[1],mo=MONTHS[m[2].slice(0,3).toLowerCase()];let y=+m[3];if(y<100)y+=2000;if(mo!=null)return new Date(y,mo,d);}m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);if(m){let y=+m[3];if(y<100)y+=2000;return new Date(y,+m[2]-1,+m[1]);}const d=new Date(s);return isNaN(d)?null:d;}
+function hasD(r,c){return pd(r[c])!==null;}
+function num(v){if(v==null)return null;const s=String(v).replace(/[^0-9.\-]/g,'');if(s===''||s==='-'||s==='.')return null;const n=parseFloat(s);return isNaN(n)?null:n;}
+
+function parseCSV(text){const rows=[];let row=[],cur='',q=false;for(let i=0;i<text.length;i++){const c=text[i];if(q){if(c==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=c;}else{if(c==='"')q=true;else if(c===',')row.push(cur),cur='';else if(c==='\n')row.push(cur),rows.push(row),row=[],cur='';else if(c==='\r'){}else cur+=c;}}if(cur!==''||row.length){row.push(cur);rows.push(row);}return rows.slice(1).filter(r=>r.length>5&&r.some(x=>x&&x.trim()));}
+
+async function loadData(){const url=document.getElementById('url').value.trim();if(!url){alert('Masukkan URL CSV.');return;}showLoad(true);try{const res=await fetch(url);if(!res.ok)throw 0;const rows=parseCSV(await res.text());if(!rows.length)throw 0;initData(rows);}catch(e){showLoad(false);document.getElementById('err').style.display='block';document.getElementById('report').innerHTML='';}}
+function loadDemo(){showLoad(true);setTimeout(()=>initData(genDemo()),350);}
+function showLoad(v){document.getElementById('load').style.display=v?'flex':'none';}
+function initData(rows){rawRows=rows;const pens=[...new Set(rows.map(penName))].sort();document.getElementById('f-pen').innerHTML='<option value="">Semua</option>'+pens.map(p=>`<option>${p}</option>`).join('');document.getElementById('err').style.display='none';render();showLoad(false);}
+
+function scopeText(){const a=document.getElementById('f-fasa').value,b=document.getElementById('f-survei').value,c=document.getElementById('f-pen').value;return [a?'Fasa '+a:null,b||null,c||null].filter(Boolean).join(' · ')||'Keseluruhan';}
+function applyScope(){const a=document.getElementById('f-fasa').value,b=document.getElementById('f-survei').value,c=document.getElementById('f-pen').value;curRows=rawRows.filter(r=>(!a||fasaOf(r)===a)&&(!b||surveiOf(r)===b)&&(!c||penName(r)===c));}
+
+/* ═══ RENDER REPORT ═══ */
+function render(){
+  if(!rawRows.length)return;
+  applyScope();
+  const today=new Date().toLocaleString('ms-MY');
+  const scope=scopeText();
+  function head(sub){return `<div class="rpt-head"><div class="l"><h1>LAPORAN PENGHANTARAN BORANG BE2026</h1><p>${sub}</p></div><div class="r"><div class="tag">DOSM SELANGOR · UHH</div><div>Skop: <span class="scope">${scope}</span></div><div>Kemaskini: ${today}</div></div></div>`;}
+  function foot(n){return `<div class="foot"><span>Laporan Penghantaran Borang BE2026 · Unit Harga-Harga</span><span>Halaman ${n} / 4</span></div>`;}
+  document.getElementById('report').innerHTML =
+    pageSummary(head,foot) + pagePenyelia(head,foot) + pageFE(head,foot) + pageK5(head,foot);
+  drawK5Chart();
+}
+
+/* ── PAGE 1: RINGKASAN ── */
+function pageSummary(head,foot){
+  const r=curRows,t=r.length;
+  let k11=0,k50=0,lk=0,kodb=0,belum=0,hart=0,runc=0,kaw=0,bat=0,ter=0;
+  const fe=new Set(),pen=new Set(),batch=new Set();
+  r.forEach(x=>{fe.add(feName(x));pen.add(penName(x));const g=rgroup(x);
+    if(g==='k11')k11++;else if(g==='k50')k50++;else if(g==='lk')lk++;else if(g==='kodb')kodb++;else belum++;
+    const sv=surveiOf(x);if(sv==='Hartanah')hart++;else if(sv==='Runcit')runc++;
+    if(hasD(x,COL.L_KAWALAN))kaw++;if(hasD(x,COL.M_BATCHING)||String(x[COL.N_NO_BATCH]||'').trim())bat++;if(hasD(x,COL.O_PROSESAN))ter++;
+    const bn=String(x[COL.N_NO_BATCH]||'').trim();if(bn)batch.add(bn);});
+  const siap=k11+k50+lk+kodb, capai=pct(siap,t);
+  const C=(lab,val,cls,s)=>`<div class="sc ${cls||''}"><div class="lab">${lab}</div><div class="val">${val}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+  return `<div class="page">${head('Ringkasan Keseluruhan · Rangka Kawalan Fasa 2 &amp; 3')}
+    <div class="sec-h">Ringkasan KPI</div>
+    <div class="sgrid">
+      ${C('Jumlah FE Aktif',fmt(fe.size))}
+      ${C('Bil Penyelia',fmt(pen.size),'p')}
+      ${C('Jumlah Agihan (No SIRI)',fmt(t),'')}
+      ${C('Siap MKO',fmt(siap),'g',capai+'% · 11+50+LK+KodB')}
+    </div>
+    <div class="sgrid" style="margin-top:12px">
+      ${C('Kod 11',fmt(k11),'g',pct(k11,t)+'%')}
+      ${C('Kod 50',fmt(k50),'gd')}
+      ${C('LK (12–60)',fmt(lk),'p',pct(lk,t)+'%')}
+      ${C('Kod B (61–77)',fmt(kodb),'c',pct(kodb,t)+'%')}
+    </div>
+    <div class="sgrid" style="margin-top:12px">
+      ${C('Belum Respon',fmt(belum),'r',pct(belum,t)+'%')}
+      ${C('Hartanah (308)',fmt(hart),'c')}
+      ${C('Runcit (337)',fmt(runc),'a')}
+      ${C('Jumlah Batch (unik)',fmt(batch.size))}
+    </div>
+    <div class="sec-h" style="margin-top:22px">Aliran Operasi</div>
+    <table class="rt"><thead><tr><th class="l">Peringkat</th><th>Borang (Kod 11+50)</th><th>F2 (selain)</th><th>Jumlah</th></tr></thead><tbody>
+      ${operRow('Hantar Kawalan',r,COL.L_KAWALAN)}
+      ${operRow('Hantar Batching',r,COL.M_BATCHING)}
+      ${operRow('Prosesan Terima',r,COL.O_PROSESAN)}
+    </tbody></table>
+    <div class="note">Nota: Siap MKO = rekod yang mempunyai sebarang kod respon (Kod 11 + 50 + LK 12–60 + Kod B 61–77). Belum Respon = belum ada status K7.</div>
+    ${foot(1)}</div>`;
+}
+function operRow(label,rows,col){
+  let a=0,f=0;rows.forEach(x=>{if(hasD(x,col)){const g=rgroup(x);if(g==='k11'||g==='k50')a++;else f++;}});
+  return `<tr><td class="l">${label}</td><td>${fmt(a)}</td><td>${fmt(f)}</td><td>${fmt(a+f)}</td></tr>`;
+}
+
+/* ── PAGE 2: BY PENYELIA (format gambar) ── */
+function pagePenyelia(head,foot){
+  const m={};
+  curRows.forEach(x=>{
+    const key=penName(x)+'||'+surveiOf(x);
+    const o=(m[key]=m[key]||{pen:penName(x),sv:surveiOf(x),kes:0,k11:0,sel:0,smd:0,pinda:0,proses:0,terima:0});
+    o.kes++;
+    if(rcode(x)===11){o.k11++;const rk=rekodOf(x);
+      if(rk==='Selesai'){o.sel++;if(hasD(x,COL.O_PROSESAN))o.terima++;}
+      else if(rk==='Semakan SMD')o.smd++;else if(rk==='Pinda Semula')o.pinda++;else if(rk==='Dalam Proses')o.proses++;}
+  });
+  const ent=Object.values(m).sort((a,b)=>a.pen<b.pen?-1:a.pen>b.pen?1:(a.sv<b.sv?-1:1));
+  const T={kes:0,k11:0,sel:0,smd:0,pinda:0,proses:0,terima:0};
+  ent.forEach(o=>['kes','k11','sel','smd','pinda','proses','terima'].forEach(k=>T[k]+=o[k]));
+  const row=(o,tot)=>{const ppen=pct1(o.terima,o.sel),baki=o.sel-o.terima;
+    return `<tr class="${tot?'tot':''}"><td class="l">${tot?'JUMLAH':o.pen}</td><td class="l">${tot?'':o.sv}</td>
+      <td>${fmt(o.kes)}</td><td class="hl">${fmt(o.k11)}</td><td>${fmt(o.sel)}</td><td>${fmt(o.smd)}</td><td>${fmt(o.pinda)}</td><td>${fmt(o.proses)}</td>
+      <td>${fmt(o.terima)}</td><td>${ppen}</td><td>${fmt(baki)}</td></tr>`;};
+  return `<div class="page">${head('Laporan By Penyelia · Status Kod 11 &amp; Penerimaan (Unit Prosesan)')}
+    <div class="sec-h">Laporan Mengikut Penyelia</div>
+    <table class="rt"><thead>
+      <tr><th class="l" rowspan="2">Penyelia</th><th class="l" rowspan="2">Survei</th><th rowspan="2">Jumlah Kes</th><th rowspan="2">Kod 11</th>
+      <th colspan="4">Pecahan Kod 11 (Status Rekod)</th><th rowspan="2">Penerimaan Borang (Selesai @ Prosesan)</th><th rowspan="2">% Penerimaan</th><th rowspan="2">Baki Penerimaan</th></tr>
+      <tr><th>Selesai</th><th>Semakan SMD</th><th>Pinda Semula</th><th>Dalam Proses</th></tr>
+    </thead><tbody>${ent.map(o=>row(o,false)).join('')}${row(T,true)}</tbody></table>
+    <div class="note">Penerimaan Borang = Kod 11 berstatus <b>Selesai</b> yang telah ada Tarikh Prosesan Terima. % Penerimaan = Penerimaan ÷ Kod 11 Selesai. Baki Penerimaan = Kod 11 Selesai − Penerimaan. (Prosesan Terima masih 0 — akan terisi apabila peringkat penerimaan bermula.)</div>
+    ${foot(2)}</div>`;
+}
+
+/* ── PAGE 3: BY FE ── */
+function pageFE(head,foot){
+  const m={};
+  curRows.forEach(x=>{const fe=feName(x);const o=(m[fe]=m[fe]||{pen:penName(x),agi:0,k11:0,k50:0,lk:0,kodb:0,kaw:0,bat:0,ter:0});
+    o.agi++;const g=rgroup(x);if(g==='k11')o.k11++;else if(g==='k50')o.k50++;else if(g==='lk')o.lk++;else if(g==='kodb')o.kodb++;
+    if(hasD(x,COL.L_KAWALAN))o.kaw++;if(hasD(x,COL.M_BATCHING)||String(x[COL.N_NO_BATCH]||'').trim())o.bat++;if(hasD(x,COL.O_PROSESAN))o.ter++;});
+  const ent=Object.entries(m).map(([fe,o])=>{o.fe=fe;o.siap=o.k11+o.k50+o.lk+o.kodb;o.baki=o.agi-o.siap;o.cap=pct(o.siap,o.agi);return o;})
+    .sort((a,b)=>b.cap-a.cap);
+  const T={agi:0,k11:0,k50:0,lk:0,kodb:0,kaw:0,bat:0,ter:0,siap:0,baki:0};
+  ent.forEach(o=>['agi','k11','k50','lk','kodb','kaw','bat','ter','siap','baki'].forEach(k=>T[k]+=o[k]));
+  T.cap=pct(T.siap,T.agi);
+  const row=(o,tot)=>`<tr class="${tot?'tot':''}"><td class="l">${tot?'JUMLAH':o.fe}</td><td class="l">${tot?'':o.pen}</td>
+    <td>${fmt(o.agi)}</td><td>${fmt(o.k11)}</td><td>${fmt(o.k50)}</td><td>${fmt(o.lk)}</td><td>${fmt(o.kodb)}</td>
+    <td>${fmt(o.kaw)}</td><td>${fmt(o.bat)}</td><td>${fmt(o.ter)}</td><td class="hl">${fmt(o.siap)}</td><td>${o.cap}%</td><td>${fmt(o.baki)}</td></tr>`;
+  return `<div class="page">${head('Laporan By FE · Pencapaian Penghantaran Borang')}
+    <div class="sec-h">Prestasi Pegawai Lapangan (FE)</div>
+    <table class="rt"><thead><tr>
+      <th class="l">Nama FE</th><th class="l">Penyelia</th><th>Agihan</th><th>Kod 11</th><th>Kod 50</th><th>LK</th><th>Kod B</th>
+      <th>Hantar Kawalan</th><th>Hantar Batching</th><th>Prosesan Terima</th><th>Siap MKO</th><th>% Capai</th><th>Baki Agihan</th>
+    </tr></thead><tbody>${ent.map(o=>row(o,false)).join('')}${row(T,true)}</tbody></table>
+    <div class="note">Siap MKO = Kod 11 + 50 + LK + Kod B. % Capai = Siap MKO ÷ Agihan. Baki Agihan = Agihan − Siap MKO (kes yang belum ada respon). Diisih ikut % Capai tertinggi.</div>
+    ${foot(3)}</div>`;
+}
+
+/* ── PAGE 4: ANALISIS 6 DATA K5 ── */
+function pageK5(head,foot){
+  const cols=[[17,'Hasil / Pendapatan','RM'],[18,'Perbelanjaan','RM'],[19,'Gaji','RM'],[20,'Pekerja','org'],[21,'Aset','RM'],[22,'Stok','RM']];
+  const stat=cols.map(([i,nm,u])=>{
+    let bil=0,sum=0,mn=Infinity,mx=-Infinity;
+    curRows.forEach(x=>{const v=num(x[i]);if(v!==null){bil++;sum+=v;if(v<mn)mn=v;if(v>mx)mx=v;}});
+    return {nm,u,bil,sum,avg:bil?sum/bil:0,mn:bil?mn:0,mx:bil?mx:0};
+  });
+  const fv=(v,u)=>u==='RM'?rm(v):fmt(Math.round(v));
+  const rows=stat.map(s=>`<tr><td class="l">${s.nm}</td><td>${s.u}</td><td>${fmt(s.bil)}</td><td>${fv(s.sum,s.u)}</td><td>${fv(s.avg,s.u)}</td><td>${fv(s.mn,s.u)}</td><td>${fv(s.mx,s.u)}</td></tr>`).join('');
+  return `<div class="page">${head('Analisis 6 Data K5 · Pendapatan, Perbelanjaan, Gaji, Pekerja, Aset, Stok')}
+    <div class="sec-h">Analisis 6 Data K5</div>
+    <table class="rt"><thead><tr><th class="l">Data K5</th><th>Unit</th><th>Bil Ada Data</th><th>Jumlah</th><th>Purata</th><th>Minimum</th><th>Maksimum</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="sec-h" style="margin-top:22px">Jumlah Nilai (RM) Mengikut Data K5</div>
+    <div class="chart-box"><canvas id="k5chart"></canvas></div>
+    <div class="legend">* Carta menunjukkan jumlah nilai (RM) bagi 5 data kewangan. "Pekerja" ialah bilangan (orang) — dipaparkan dalam jadual sahaja, tidak dalam carta RM.</div>
+    <div class="note">Data K5 hanya wujud bagi borang yang telah direkod nilainya (kebanyakannya kes lengkap / Kod 11). Bil Ada Data = bilangan rekod yang mempunyai nilai bukan kosong bagi data berkenaan.</div>
+    ${foot(4)}</div>`;
+}
+function drawK5Chart(){
+  const el=document.getElementById('k5chart');if(!el)return;
+  const cols=[[17,'Hasil/Pendapatan'],[18,'Perbelanjaan'],[19,'Gaji'],[21,'Aset'],[22,'Stok']];
+  const data=cols.map(([i])=>{let s=0;curRows.forEach(x=>{const v=num(x[i]);if(v!==null)s+=v;});return s;});
+  if(k5chart)k5chart.destroy();
+  k5chart=new Chart(el,{type:'bar',data:{labels:cols.map(c=>c[1]),datasets:[{label:'Jumlah (RM)',data,backgroundColor:['#2563eb','#ef4444','#f59e0b','#8b5cf6','#06b6d4'],borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'RM '+Number(c.raw).toLocaleString('ms-MY')}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v>=1e6?(v/1e6)+'jt':v>=1e3?(v/1e3)+'k':v}}}}});
+}
+
+/* ═══ DEMO ═══ */
+function genDemo(){
+  const fes=['QISTINA','HANA','NUAIM','ZAWANI','MAISARAH','IKHWAN','NAJWA','ALFIAN','AIMAN','AINUDDIN'];
+  const pens=['nursyuzalawaty','suhaina.wahab','ahmadmaliki'];
+  const fasas=['Fasa 2 - Selain NPI','Fasa 3'];const sv=['337 - Runcit','308 - Hartanah'];
+  const codes=['11-Borang Lengkap','50-Salah','21-Alamat','22-Tiada','23-Berpindah','31-Tidak operasi','40-Tutup','71-Janji','76-Proses'];
+  const rek=['Dalam Proses','Semakan SMD','Selesai'];const mo=['May','Jun'];const rows=[];
+  for(let i=0;i<600;i++){const r=new Array(43).fill('');
+    r[COL.FASA]=fasas[Math.random()>.85?1:0];r[COL.NO_SIRI]='S'+(1e5+i);r[COL.PENYELIA]=pens[i%3];r[COL.FE]=fes[i%fes.length];r[COL.AP_SURVEI]=sv[Math.random()>.25?0:1];
+    if(Math.random()>.5){const c=Math.random()>.78?codes[0]:codes[(Math.random()*codes.length)|0];r[COL.P_RESP]=c;r[COL.Q_REKOD]=rek[(Math.random()*rek.length)|0];
+      if(c[0]==='1'&&Math.random()>.6){r[17]=String((Math.random()*1e6|0));r[18]=String((Math.random()*5e5|0));r[19]=String((Math.random()*8e4|0));r[20]=String(1+(Math.random()*20|0));r[21]=String((Math.random()*3e5|0));r[22]=String((Math.random()*1e5|0));}
+      if(Math.random()>.5)r[COL.L_KAWALAN]=(1+(Math.random()*27|0))+'-'+mo[(Math.random()*2)|0]+'-26';}
+    rows.push(r);}
+  return rows;
+}
+
+setInterval(()=>{const u=document.getElementById('url').value.trim();if(u&&rawRows.length)loadData();},10*60*1000);
+(function(){const i=document.getElementById('url');if(DEFAULT_URL){i.value=DEFAULT_URL;loadData();}else{showLoad(false);document.getElementById('err').style.display='block';}})();
+</script>
+</body>
+</html>
