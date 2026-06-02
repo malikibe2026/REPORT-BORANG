@@ -142,6 +142,7 @@ table#fe-table tr.row-ok td{background:#f0fdf4}table#fe-table tr.row-mid td{back
   <div class="fgroup"><label>Penyelia</label><select id="f-penyelia" onchange="applyFilters()"><option value="">Semua</option></select></div>
   <div class="fgroup"><label>Sasaran %</label><input type="number" id="f-target" value="45" min="0" max="100" step="1" onchange="applyFilters()"></div>
   <div class="spacer"></div>
+  <a class="btn btn-dark" href="laporan.html" style="text-decoration:none">📄 Laporan Berpages</a>
   <button class="btn btn-dark" onclick="window.print()">🖨️ Simpan PDF</button>
   <button class="btn btn-dark" onclick="sendEmail()">✉️ Hantar Email</button>
   <div class="urlwrap">
@@ -175,17 +176,17 @@ table#fe-table tr.row-ok td{background:#f0fdf4}table#fe-table tr.row-mid td{back
   </div>
 
   <div class="sec-title"><h2>Ringkasan Penyelia</h2><div class="pill" id="pill-target1">Sasaran 45%</div><div class="sec-divider"></div></div>
-  <div class="card"><div class="card-head">🧑‍💼 Group by ID Penyelia &nbsp;<span style="font-weight:400;color:var(--muted);font-size:.74rem">· Siap = Kod 11+50+LK · Baki = sasaran − Siap</span></div>
+  <div class="card"><div class="card-head">🧑‍💼 Group by ID Penyelia &nbsp;<span style="font-weight:400;color:var(--muted);font-size:.74rem">· Siap MKO = Kod 11+50+LK+Kod B · Baki Agihan = Agihan − Siap MKO</span></div>
     <div class="card-body" style="overflow-x:auto"><table class="dash-table" id="tbl-penyelia"></table></div></div>
 
   <div class="sec-title"><h2>Prestasi Pegawai Lapangan (FE)</h2><div class="pill" id="pill-target2">Sasaran 45%</div><div class="sec-divider"></div></div>
-  <div class="card"><div class="card-head">👤 Senarai Prestasi FE <span style="font-weight:400;color:var(--muted);font-size:.74rem">· Kawalan: Borang = Kod 11+50, F2 = selain itu · Batching/Terima = jumlah · Baki Agihan = Agihan − Siap</span></div>
+  <div class="card"><div class="card-head">👤 Senarai Prestasi FE <span style="font-weight:400;color:var(--muted);font-size:.74rem">· Siap MKO = Kod 11+50+LK+Kod B · Kawalan: Borang=11+50, F2=selain · Baki Agihan = Agihan − Siap MKO</span></div>
     <div class="card-body" style="overflow-x:auto">
       <table id="fe-table" class="display" style="width:100%">
         <thead><tr>
-          <th>Nama FE</th><th>Penyelia</th><th>Agihan</th><th>Kod 11</th><th>Kod 50</th><th>LK</th>
+          <th>Nama FE</th><th>Penyelia</th><th>Agihan</th><th>Kod 11</th><th>Kod 50</th><th>LK</th><th>Kod B</th>
           <th>Kawalan Borang</th><th>Kawalan F2</th><th>Batching</th><th>Terima</th>
-          <th>Siap</th><th>% Capai</th><th>Baki Agihan</th><th>Status</th>
+          <th>Siap MKO</th><th>% Capai</th><th>Baki Agihan</th><th>Status</th>
         </tr></thead>
         <tbody id="fe-tbody"></tbody>
       </table>
@@ -290,7 +291,7 @@ function stats(rows){
     if(hasDate(r,COL.M_BATCHING)&&grp){s.bat.t++;s.bat[grp]++;}
     if(hasDate(r,COL.O_PROSESAN)&&grp){s.ter.t++;s.ter[grp]++;}
   });
-  s.siap=s.k11+s.k50+s.lk;
+  s.siap=s.k11+s.k50+s.lk+s.kodb;   // Siap MKO = semua yang ada respon
   return s;
 }
 function statusOf(capPct,target){
@@ -312,7 +313,7 @@ function renderKPI(rows){
     {l:'LK (12–60)',v:s.lk,c:'c-purple',i:'📝',sub:`${pct(s.lk,t)}% drp Agihan`},
     {l:'Kod B (61–77)',v:s.kodb,c:'c-cyan',i:'⏳',sub:`${pct(s.kodb,t)}% · dalam proses`},
     {l:'Belum Respon',v:s.belum,c:'c-red',i:'⬜',sub:`${pct(s.belum,t)}% drp Agihan`},
-    {l:'Siap (11+50+LK)',v:s.siap,c:'c-green',i:'✅',sub:`<b>${capai}%</b> capai · sasaran ${tg}%`},
+    {l:'Siap MKO (11+50+LK+B)',v:s.siap,c:'c-green',i:'✅',sub:`<b>${capai}%</b> capai · sasaran ${tg}%`},
     {l:'Baki ke Sasaran',v:bk,c:'c-red',i:'🎯',sub:`untuk capai ${tg}% (keseluruhan)`},
     {l:'Hartanah (308)',v:s.hartanah,c:'c-cyan',i:'🏢',sub:`${pct(s.hartanah,t)}%`},
     {l:'Runcit (337)',v:s.runcit,c:'c-accent',i:'🛒',sub:`${pct(s.runcit,t)}%`},
@@ -403,7 +404,7 @@ function renderPenyelia(rows){
   rows.forEach(r=>T.fe.add(feName(r)));
   ent.forEach(([,d])=>{['agi','k11','k50','lk','kodb','belum','kaw'].forEach(k=>T[k]+=d[k]);});
   function rowHTML(name,d,isTot){
-    const siap=d.k11+d.k50+d.lk,cap=pct(siap,d.agi),bk=d.agi-siap,st=statusOf(cap,tg);
+    const siap=d.k11+d.k50+d.lk+d.kodb,cap=pct(siap,d.agi),bk=d.agi-siap,st=statusOf(cap,tg);
     return `<tr class="${isTot?'total ':''}${st.r}"><td>${name}</td><td class="num">${fmt(d.fe.size)}</td><td class="num">${fmt(d.agi)}</td>
       <td class="num">${fmt(d.k11)}</td><td class="num">${fmt(d.k50)}</td><td class="num">${fmt(d.lk)}</td><td class="num">${fmt(d.kodb)}</td><td class="num">${fmt(d.belum)}</td>
       <td class="num">${fmt(d.kaw)}</td><td class="num">${fmt(siap)}</td><td class="num">${cap}%</td><td class="num">${fmt(bk)}</td><td><span class="st ${st.c}">${st.t}</span></td></tr>`;
@@ -416,22 +417,22 @@ function renderPenyelia(rows){
 /* ═══ FE TABLE ═══ */
 function renderFE(rows){
   const tg=getTarget(),m={};
-  rows.forEach(r=>{const fe=feName(r);const o=(m[fe]=m[fe]||{pen:penyeliaName(r),agi:0,k11:0,k50:0,lk:0,kawB:0,kawF2:0,bat:0,ter:0});
+  rows.forEach(r=>{const fe=feName(r);const o=(m[fe]=m[fe]||{pen:penyeliaName(r),agi:0,k11:0,k50:0,lk:0,kodb:0,kawB:0,kawF2:0,bat:0,ter:0});
     o.agi++;const g=respGroup(r);
-    if(g==='k11')o.k11++;else if(g==='k50')o.k50++;else if(g==='lk')o.lk++;
+    if(g==='k11')o.k11++;else if(g==='k50')o.k50++;else if(g==='lk')o.lk++;else if(g==='kodb')o.kodb++;
     if(hasDate(r,COL.L_KAWALAN)){if(g==='k11'||g==='k50')o.kawB++;else o.kawF2++;}
     if(hasDate(r,COL.M_BATCHING)||String(r[COL.N_NO_BATCH]||'').trim())o.bat++;
     if(hasDate(r,COL.O_PROSESAN))o.ter++;});
   document.getElementById('fe-tbody').innerHTML=Object.entries(m).map(([fe,d])=>{
-    const siap=d.k11+d.k50+d.lk,cap=pct(siap,d.agi),bakiAgi=d.agi-siap,st=statusOf(cap,tg);
-    return `<tr class="${st.r}"><td>${fe}</td><td style="text-align:left;font-family:var(--font)">${d.pen}</td><td>${fmt(d.agi)}</td><td>${fmt(d.k11)}</td><td>${fmt(d.k50)}</td><td>${fmt(d.lk)}</td><td>${fmt(d.kawB)}</td><td>${fmt(d.kawF2)}</td><td>${fmt(d.bat)}</td><td>${fmt(d.ter)}</td><td>${fmt(siap)}</td><td>${cap}%</td><td>${fmt(bakiAgi)}</td><td><span class="st ${st.c}">${st.t}</span></td></tr>`;
+    const siap=d.k11+d.k50+d.lk+d.kodb,cap=pct(siap,d.agi),bakiAgi=d.agi-siap,st=statusOf(cap,tg);
+    return `<tr class="${st.r}"><td>${fe}</td><td style="text-align:left;font-family:var(--font)">${d.pen}</td><td>${fmt(d.agi)}</td><td>${fmt(d.k11)}</td><td>${fmt(d.k50)}</td><td>${fmt(d.lk)}</td><td>${fmt(d.kodb)}</td><td>${fmt(d.kawB)}</td><td>${fmt(d.kawF2)}</td><td>${fmt(d.bat)}</td><td>${fmt(d.ter)}</td><td>${fmt(siap)}</td><td>${cap}%</td><td>${fmt(bakiAgi)}</td><td><span class="st ${st.c}">${st.t}</span></td></tr>`;
   }).join('');
   if(feTable){feTable.destroy();feTable=null;}
   feTable=$('#fe-table').DataTable({dom:'Bfrtip',
     buttons:[{extend:'csv',text:'⬇ Export CSV',filename:'prestasi_fe_be2026'}],
-    pageLength:15,order:[[11,'desc']],scrollX:true,stripeClasses:[],
+    pageLength:15,order:[[12,'desc']],scrollX:true,stripeClasses:[],
     language:{search:'Cari:',paginate:{previous:'‹',next:'›'},info:'Paparan _START_–_END_ drp _TOTAL_ FE',lengthMenu:'Papar _MENU_',zeroRecords:'Tiada rekod',infoEmpty:'Tiada rekod',infoFiltered:'(ditapis drp _MAX_)'},
-    columnDefs:[{targets:'_all',className:'dt-right'},{targets:[0,1],className:''},{targets:11,render:(d,t)=>(t==='sort'||t==='type')?parseFloat(d):d}]});
+    columnDefs:[{targets:'_all',className:'dt-right'},{targets:[0,1],className:''},{targets:12,render:(d,t)=>(t==='sort'||t==='type')?parseFloat(d):d}]});
 }
 
 /* ═══ HANTAR EMAIL (mailto dengan ringkasan) ═══ */
@@ -458,7 +459,7 @@ RINGKASAN KPI
 - Hantar Kawalan : ${fmt(s.kaw.t)}
 - Jumlah Batch (unik) : ${fmt(s.batch.size)}
 
-PENCAPAIAN (Siap = Kod 11+50+LK)
+PENCAPAIAN (Siap MKO = Kod 11+50+LK+Kod B)
 - Siap : ${fmt(s.siap)} (${cap}%)
 - Sasaran : ${tg}%
 - Baki perlu hantar : ${fmt(bk)}
