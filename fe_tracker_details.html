@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FE Tracker Details – BE2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0a1628;--navy2:#0f2044;--blue:#1a4fad;--blue2:#2563eb;--accent:#38bdf8;--gold:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;--cyan:#06b6d4;--slate:#94a3b8;--white:#fff;--bg:#eef3fa;--card:#fff;--border:#dde4f0;--text:#1e2d4a;--muted:#64748b;--shadow:0 2px 14px rgba(10,22,40,.08);--shadow2:0 10px 34px rgba(10,22,40,.14);--radius:14px;--font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+
+.header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 50%,#112255 100%);color:#fff;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.header-inner{position:relative;display:flex;align-items:center;justify-content:space-between;padding:20px 32px;gap:18px;flex-wrap:wrap}
+.hl{display:flex;align-items:center;gap:15px}
+.hbadge{width:50px;height:50px;background:linear-gradient(135deg,var(--blue2),var(--accent));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:23px}
+.header h1{font-size:1.28rem;font-weight:800;letter-spacing:.02em;line-height:1.15}
+.header p{font-size:.78rem;opacity:.7;letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
+.hr{text-align:right;font-size:.72rem;opacity:.65}.hr .tag{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:18px;padding:3px 12px;font-weight:700;margin-bottom:5px}
+.hr a{color:#cfe0fb;text-decoration:none;font-size:.72rem}
+
+/* TABS */
+.tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;display:flex;gap:4px;position:sticky;top:0;z-index:40;box-shadow:0 1px 8px rgba(10,22,40,.04)}
+.tab{padding:14px 22px;font-size:.85rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;letter-spacing:.02em;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--navy2)}
+.tab.on{color:var(--blue2);border-bottom-color:var(--blue2)}
+
+/* FILTERS */
+.filters{padding:14px 32px 4px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.fg{display:flex;align-items:center;gap:7px}
+.fg label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.fg select,.fg input{border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.82rem;font-family:var(--font);color:var(--text);background:#fff}
+.fg select{cursor:pointer;min-width:120px}.fg input{width:180px}
+.fg select:focus,.fg input:focus{outline:none;border-color:var(--blue2)}
+.filters .sp{flex:1}
+.urlw{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.urlw input{font-family:var(--mono);font-size:.74rem;width:190px;max-width:50vw}
+.btn{background:var(--blue2);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--blue)}.btn.gh{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn.gh:hover{background:var(--bg)}
+
+.main{padding:18px 32px 40px;max-width:1500px;margin:0 auto}
+
+/* SUMMARY */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:16px}
+.scard{background:var(--card);border-radius:var(--radius);padding:18px 18px 15px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden}
+.scard::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.scard.b::after{background:var(--blue2)}.scard.g::after{background:var(--green)}.scard.c::after{background:var(--cyan)}.scard.r::after{background:var(--red)}
+.scard .lab{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.scard .val{font-family:var(--mono);font-size:1.85rem;font-weight:500;color:var(--navy);line-height:1}
+.scard .s{font-size:.7rem;color:var(--muted);margin-top:6px}
+.statusbar-card{background:var(--card);border-radius:var(--radius);padding:16px 20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:18px}
+.statusbar-card h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--navy2);margin-bottom:12px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:.73rem;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
+
+/* TABLE */
+.tcard{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
+.tcard-head{padding:14px 20px;border-bottom:1px solid var(--border);font-size:.82rem;font-weight:700;color:var(--navy2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.tcard-head .cnt{font-weight:400;color:var(--muted);font-size:.75rem}
+.twrap{overflow-x:auto}
+table.tk{width:100%;border-collapse:collapse;font-size:.8rem;min-width:760px}
+table.tk th{background:var(--navy2);color:#fff;font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;padding:11px 12px;text-align:left;white-space:nowrap;position:sticky;top:0}
+table.tk th.num{text-align:right}
+table.tk td{padding:10px 12px;border-bottom:1px solid #f0f3fa;vertical-align:middle}
+table.tk td.num{text-align:right;font-family:var(--mono)}
+table.tk tr.fe{cursor:pointer;transition:background .12s}
+table.tk tr.fe:hover{background:#f3f7fe}
+table.tk tr.fe.open{background:#eef4ff}
+table.tk .fen{font-weight:600;color:var(--navy2);display:flex;align-items:center;gap:8px}
+.caret{display:inline-block;width:16px;color:var(--blue2);font-size:.7rem;transition:transform .15s}
+tr.fe.open .caret{transform:rotate(90deg)}
+.pen-badge{display:inline-block;background:#eef2f8;color:#475569;border-radius:8px;padding:2px 8px;font-size:.7rem;font-weight:600}
+table.tk tr.tot td{background:#f5f8ff;font-weight:700;color:var(--navy2);border-top:2px solid var(--border)}
+
+/* BARS */
+.sbar{display:flex;height:18px;border-radius:5px;overflow:hidden;background:#eef2f8;min-width:120px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.03)}
+.sbar i{height:100%;transition:width .4s}
+.cb{display:flex;align-items:center;gap:9px;min-width:130px}
+.pbar{position:relative;height:18px;border-radius:5px;background:#eef2f8;flex:1;min-width:54px;overflow:hidden}
+.pbar i{position:absolute;left:0;top:0;height:100%;border-radius:5px;transition:width .4s}
+.cb .cnt{font-family:var(--mono);font-size:.78rem;color:var(--text);white-space:nowrap;min-width:58px;text-align:right}
+.cb .cnt small{color:var(--muted);font-size:.66rem}
+
+/* DETAIL */
+tr.det>td{padding:0;background:#f8fafd;border-bottom:1px solid #e6ebf4}
+.det-in{padding:16px 22px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:820px){.det-in{grid-template-columns:1fr}}
+.det-in h5{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--navy2);margin-bottom:9px}
+table.dt2{width:100%;border-collapse:collapse;font-size:.76rem}
+table.dt2 th{background:#e8eef8;color:var(--navy2);font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;padding:7px 9px;text-align:right;border-bottom:1px solid #d7e0ee}
+table.dt2 th.l{text-align:left}
+table.dt2 td{padding:6px 9px;border-bottom:1px solid #eef2f8;text-align:right;font-family:var(--mono)}
+table.dt2 td.l{text-align:left;font-family:var(--font)}
+.funnel{display:flex;flex-direction:column;gap:8px}
+.frow{display:flex;align-items:center;gap:10px;font-size:.77rem}
+.frow .fl{width:130px;color:var(--text)}
+.frow .ft{flex:1;height:20px;background:#eef2f8;border-radius:5px;position:relative;overflow:hidden}
+.frow .ft i{position:absolute;left:0;top:0;height:100%;border-radius:5px}
+.frow .fv{font-family:var(--mono);width:74px;text-align:right;font-size:.74rem}
+
+#load{position:fixed;inset:0;background:rgba(10,22,40,.72);display:flex;align-items:center;justify-content:center;z-index:9999;color:#fff;flex-direction:column;gap:14px}
+.spin{width:42px;height:42px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#err{display:none;margin:30px auto;max-width:760px;background:#fff5f5;border:1px solid #fed7d7;color:#9b2c2c;border-radius:12px;padding:18px 22px;font-size:.85rem}
+.empty{padding:30px;text-align:center;color:var(--muted);font-size:.85rem}
+
+@media(max-width:700px){.main{padding:14px}.header-inner,.tabs,.filters{padding-left:16px;padding-right:16px}.sgrid{grid-template-columns:1fr 1fr}.fg input,.urlw input{width:100%}}
+</style>
+</head>
+<body>
+
+<div id="load"><div class="spin"></div><div>Memuatkan data BE2026...</div></div>
+
+<div class="header"><div class="header-inner">
+  <div class="hl"><div class="hbadge">🔎</div><div><h1>FE TRACKER DETAILS</h1><p>Jejak Borang &amp; F2 mengikut FE · BE2026 · UHH</p></div></div>
+  <div class="hr"><div class="tag">DOSM SELANGOR</div><div>Kemaskini: <span id="upd">—</span></div><div><a href="index.html">← Dashboard</a> · <a href="laporan.html">Laporan Berpages</a></div></div>
+</div></div>
+
+<div class="tabs">
+  <div class="tab on" id="tab-borang" onclick="setTab('borang')">📋 Borang (Kod 11 &amp; 50)</div>
+  <div class="tab" id="tab-f2" onclick="setTab('f2')">📑 F2 (Kes LK)</div>
+</div>
+
+<div class="filters">
+  <div class="fg"><label>Fasa</label><select id="f-fasa" onchange="render()"><option value="">Semua</option><option value="2">Fasa 2</option><option value="3">Fasa 3</option></select></div>
+  <div class="fg"><label>Penyelia</label><select id="f-pen" onchange="render()"><option value="">Semua</option></select></div>
+  <div class="fg"><label>Survei</label><select id="f-sv" onchange="render()"><option value="">Semua</option><option value="Hartanah">Hartanah</option><option value="Runcit">Runcit</option></select></div>
+  <div class="fg"><label>Cari FE</label><input type="text" id="f-q" placeholder="nama FE..." oninput="render()"></div>
+  <div class="fg"><label>Susun</label><select id="f-sort" onchange="render()"><option value="jum">Jumlah</option><option value="kaw">% Kawalan</option><option value="ter">% Prosesan</option><option value="nama">Nama A–Z</option></select></div>
+  <div class="sp"></div>
+  <div class="urlw"><input type="text" id="url" placeholder="URL CSV ..."><button class="btn" onclick="loadData()">⟳ Muat</button><button class="btn gh" onclick="loadDemo()">Demo</button></div>
+</div>
+
+<div class="main">
+  <div class="sgrid" id="summary"></div>
+  <div class="statusbar-card" id="statusoverview"></div>
+  <div class="tcard">
+    <div class="tcard-head"><span id="tk-title">Prestasi & Jejak FE</span><span class="cnt" id="tk-cnt"></span></div>
+    <div class="twrap"><table class="tk" id="tk"></table></div>
+  </div>
+</div>
+<div id="err">⚠️ Tiada data. Pastikan URL CSV sah & helaian "Publish to web", atau klik <b>Demo</b>.</div>
+
+<script>
+const COL={FASA:0,NO_SIRI:1,PENYELIA:2,FE:3,L_KAWALAN:11,M_BATCHING:12,N_NO_BATCH:13,O_PROSESAN:14,P_RESP:15,Q_REKOD:16,AP_SURVEI:41};
+const DEFAULT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSUeV4tfzv1ErhjT3e3o7P1lRO42zXMBb76TBHmUDe7lFHqS313TRIxol6nboeQIqYBsxo4FQrBdP8u/pub?gid=998975185&single=true&output=csv';
+let rawRows=[],TAB='borang',openSet=new Set();
+
+// status colours
+const SC={'Selesai':'#10b981','Semakan SMD':'#f59e0b','Dalam Proses':'#94a3b8','Pinda Semula':'#8b5cf6'};
+const STATUSES=['Selesai','Semakan SMD','Dalam Proses','Pinda Semula'];
+
+const fmt=n=>(n==null||isNaN(n))?'0':Number(n).toLocaleString('ms-MY');
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+function feName(r){return String(r[COL.FE]||'').trim()||'Tidak Dikenali';}
+function penName(r){return String(r[COL.PENYELIA]||'').trim()||'(Tiada)';}
+function fasaOf(r){const v=String(r[COL.FASA]||'');if(/fasa\s*2/i.test(v))return '2';if(/fasa\s*3/i.test(v))return '3';return v.trim()||'(lain)';}
+function surveiOf(r){const m=String(r[COL.AP_SURVEI]||'').match(/(\d{3})/);const c=m?m[1]:'';return c==='308'?'Hartanah':c==='337'?'Runcit':'(Lain)';}
+function rcode(r){const m=String(r[COL.P_RESP]||'').match(/^\s*(\d+)/);return m?parseInt(m[1],10):null;}
+function rekodOf(r){const v=String(r[COL.Q_REKOD]||'').trim();return v||'(kosong)';}
+const MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,mac:2,mei:4,ogo:7,ogos:7,dis:11};
+function pd(s){if(!s)return null;s=String(s).trim();if(!s)return null;let m=s.match(/^(\d{1,2})[-\/ ]([A-Za-z]{3,})[-\/ ](\d{2,4})$/);if(m){const d=+m[1],mo=MONTHS[m[2].slice(0,3).toLowerCase()];let y=+m[3];if(y<100)y+=2000;if(mo!=null)return new Date(y,mo,d);}m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);if(m){let y=+m[3];if(y<100)y+=2000;return new Date(y,+m[2]-1,+m[1]);}const d=new Date(s);return isNaN(d)?null:d;}
+function hasD(r,c){return pd(r[c])!==null;}
+function inUniverse(c){if(TAB==='borang')return c===11||c===50;return c!==null&&c>=12&&c<=60&&c!==50;}
+
+function parseCSV(text){const rows=[];let row=[],cur='',q=false;for(let i=0;i<text.length;i++){const c=text[i];if(q){if(c==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=c;}else{if(c==='"')q=true;else if(c===',')row.push(cur),cur='';else if(c==='\n')row.push(cur),rows.push(row),row=[],cur='';else if(c==='\r'){}else cur+=c;}}if(cur!==''||row.length){row.push(cur);rows.push(row);}return rows.slice(1).filter(r=>r.length>5&&r.some(x=>x&&x.trim()));}
+
+async function loadData(){const url=document.getElementById('url').value.trim();if(!url){alert('Masukkan URL CSV.');return;}showLoad(true);try{const res=await fetch(url);if(!res.ok)throw 0;const rows=parseCSV(await res.text());if(!rows.length)throw 0;initData(rows);}catch(e){showLoad(false);document.getElementById('err').style.display='block';}}
+function loadDemo(){showLoad(true);setTimeout(()=>initData(genDemo()),350);}
+function showLoad(v){document.getElementById('load').style.display=v?'flex':'none';}
+function initData(rows){rawRows=rows;const pens=[...new Set(rows.map(penName))].sort();document.getElementById('f-pen').innerHTML='<option value="">Semua</option>'+pens.map(p=>`<option>${p}</option>`).join('');document.getElementById('upd').textContent=new Date().toLocaleString('ms-MY');document.getElementById('err').style.display='none';render();showLoad(false);}
+
+function setTab(t){TAB=t;openSet.clear();document.getElementById('tab-borang').classList.toggle('on',t==='borang');document.getElementById('tab-f2').classList.toggle('on',t==='f2');render();}
+
+function filtered(){const a=document.getElementById('f-fasa').value,p=document.getElementById('f-pen').value,s=document.getElementById('f-sv').value;
+  return rawRows.filter(r=>(!a||fasaOf(r)===a)&&(!p||penName(r)===p)&&(!s||surveiOf(r)===s)&&inUniverse(rcode(r)));}
+
+/* aggregate per FE for the active universe */
+function aggregate(rows){
+  const m={};
+  rows.forEach(r=>{
+    const fe=feName(r);
+    const o=(m[fe]=m[fe]||{fe,pen:penName(r),jum:0,kaw:0,bat:0,ter:0,byCode:{},byStatus:{}});
+    o.jum++;
+    const c=rcode(r), st=rekodOf(r);
+    const k=hasD(r,COL.L_KAWALAN), b=(hasD(r,COL.M_BATCHING)||String(r[COL.N_NO_BATCH]||'').trim()), t=hasD(r,COL.O_PROSESAN);
+    if(k)o.kaw++; if(b)o.bat++; if(t)o.ter++;
+    const cc=(o.byCode[c]=o.byCode[c]||{bil:0,kaw:0,ter:0}); cc.bil++; if(k)cc.kaw++; if(t)cc.ter++;
+    const ss=(o.byStatus[st]=o.byStatus[st]||{bil:0,kaw:0,ter:0}); ss.bil++; if(k)ss.kaw++; if(t)ss.ter++;
+  });
+  return Object.values(m);
+}
+
+function render(){
+  if(!rawRows.length)return;
+  const rows=filtered();
+  let list=aggregate(rows);
+  const q=document.getElementById('f-q').value.trim().toLowerCase();
+  if(q)list=list.filter(o=>o.fe.toLowerCase().includes(q));
+  const sort=document.getElementById('f-sort').value;
+  list.sort((a,b)=> sort==='nama'?(a.fe<b.fe?-1:1): sort==='kaw'?(b.kaw/b.jum-a.kaw/a.jum): sort==='ter'?(b.ter/b.jum-a.ter/a.jum):(b.jum-a.jum));
+  renderSummary(rows,list);
+  renderTable(list);
+}
+
+function renderSummary(rows,list){
+  const jum=rows.length;
+  let kaw=0,ter=0,bat=0; const stTot={};
+  rows.forEach(r=>{if(hasD(r,COL.L_KAWALAN))kaw++;if(hasD(r,COL.O_PROSESAN))ter++;if(hasD(r,COL.M_BATCHING)||String(r[COL.N_NO_BATCH]||'').trim())bat++;const s=rekodOf(r);stTot[s]=(stTot[s]||0)+1;});
+  const uni=TAB==='borang'?'Borang (Kod 11 & 50)':'F2 (Kes LK 12–60)';
+  const C=(lab,val,cls,s)=>`<div class="scard ${cls}"><div class="lab">${lab}</div><div class="val">${val}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+  document.getElementById('summary').innerHTML=
+    C('Jumlah '+(TAB==='borang'?'Borang':'F2'),fmt(jum),'b',uni)+
+    C('Diterima Kawalan',fmt(kaw),'g',pct(kaw,jum)+'% drp jumlah')+
+    C('Prosesan Terima',fmt(ter),'c',pct(ter,jum)+'% drp jumlah')+
+    C('Baki Belum Kawalan',fmt(jum-kaw),'r','perlu hantar kawalan');
+  // status overview stacked bar
+  const segs=STATUSES.filter(s=>stTot[s]).map(s=>`<i style="width:${(stTot[s]/jum*100)}%;background:${SC[s]}" title="${s}: ${fmt(stTot[s])}"></i>`).join('');
+  const kos=stTot['(kosong)']?`<i style="width:${stTot['(kosong)']/jum*100}%;background:#e2e8f0" title="Tiada status: ${fmt(stTot['(kosong)'])}"></i>`:'';
+  const leg=STATUSES.filter(s=>stTot[s]).map(s=>`<span><i style="background:${SC[s]}"></i>${s}: <b>${fmt(stTot[s])}</b> (${pct(stTot[s],jum)}%)</span>`).join('');
+  document.getElementById('statusoverview').innerHTML=`<h4>Status Rekod — Keseluruhan ${uni}</h4><div class="sbar" style="height:22px">${segs}${kos}</div><div class="legend">${leg}</div>`;
+}
+
+function statusBar(o){
+  const segs=STATUSES.filter(s=>o.byStatus[s]).map(s=>{const v=o.byStatus[s].bil;return `<i style="width:${v/o.jum*100}%;background:${SC[s]}" title="${s}: ${fmt(v)}"></i>`;}).join('');
+  const kos=o.byStatus['(kosong)']?`<i style="width:${o.byStatus['(kosong)'].bil/o.jum*100}%;background:#e2e8f0"></i>`:'';
+  return `<div class="sbar">${segs}${kos}</div>`;
+}
+function progBar(val,total,color){const p=pct(val,total);return `<div class="cb"><div class="pbar"><i style="width:${p}%;background:${color}"></i></div><span class="cnt">${fmt(val)} <small>${p}%</small></span></div>`;}
+
+function renderTable(list){
+  document.getElementById('tk-title').textContent = TAB==='borang'?'Jejak Borang (Kod 11 & 50) mengikut FE':'Jejak F2 / Lebih Kawalan (LK) mengikut FE';
+  document.getElementById('tk-cnt').textContent = list.length+' FE · klik baris untuk butiran';
+  const tk=document.getElementById('tk');
+  if(!list.length){tk.innerHTML='';document.querySelector('#tk').innerHTML='<tbody><tr><td class="empty">Tiada FE dalam tapisan ini.</td></tr></tbody>';return;}
+  const borang=TAB==='borang';
+  const head = borang
+    ? `<tr><th>Nama FE</th><th>Penyelia</th><th class="num">Jumlah</th><th class="num">Kod 11</th><th class="num">Kod 50</th><th>Status Rekod</th><th>Diterima Kawalan</th><th>Prosesan Terima</th><th class="num">Baki Kawalan</th></tr>`
+    : `<tr><th>Nama FE</th><th>Penyelia</th><th class="num">Jumlah</th><th>Status Rekod</th><th>Diterima Kawalan</th><th>Prosesan Terima</th><th class="num">Baki Kawalan</th></tr>`;
+  const cols = borang?9:7;
+  let body='';
+  const T={jum:0,k11:0,k50:0,kaw:0,ter:0};
+  list.forEach((o,i)=>{
+    const k11=(o.byCode[11]||{}).bil||0, k50=(o.byCode[50]||{}).bil||0;
+    T.jum+=o.jum;T.k11+=k11;T.k50+=k50;T.kaw+=o.kaw;T.ter+=o.ter;
+    const open=openSet.has(o.fe);
+    const main = borang
+      ? `<td><div class="fen"><span class="caret">▶</span>${o.fe}</div></td><td><span class="pen-badge">${o.pen}</span></td><td class="num">${fmt(o.jum)}</td><td class="num">${fmt(k11)}</td><td class="num">${fmt(k50)}</td><td>${statusBar(o)}</td><td>${progBar(o.kaw,o.jum,'#2563eb')}</td><td>${progBar(o.ter,o.jum,'#10b981')}</td><td class="num">${fmt(o.jum-o.kaw)}</td>`
+      : `<td><div class="fen"><span class="caret">▶</span>${o.fe}</div></td><td><span class="pen-badge">${o.pen}</span></td><td class="num">${fmt(o.jum)}</td><td>${statusBar(o)}</td><td>${progBar(o.kaw,o.jum,'#2563eb')}</td><td>${progBar(o.ter,o.jum,'#10b981')}</td><td class="num">${fmt(o.jum-o.kaw)}</td>`;
+    body+=`<tr class="fe ${open?'open':''}" onclick="toggle('${o.fe.replace(/'/g,"\\'")}')">${main}</tr>`;
+    body+=`<tr class="det" style="${open?'':'display:none'}"><td colspan="${cols}">${open?detailHTML(o):''}</td></tr>`;
+  });
+  const totRow = borang
+    ? `<tr class="tot"><td>JUMLAH</td><td></td><td class="num">${fmt(T.jum)}</td><td class="num">${fmt(T.k11)}</td><td class="num">${fmt(T.k50)}</td><td></td><td class="num">${fmt(T.kaw)} (${pct(T.kaw,T.jum)}%)</td><td class="num">${fmt(T.ter)} (${pct(T.ter,T.jum)}%)</td><td class="num">${fmt(T.jum-T.kaw)}</td></tr>`
+    : `<tr class="tot"><td>JUMLAH</td><td></td><td class="num">${fmt(T.jum)}</td><td></td><td class="num">${fmt(T.kaw)} (${pct(T.kaw,T.jum)}%)</td><td class="num">${fmt(T.ter)} (${pct(T.ter,T.jum)}%)</td><td class="num">${fmt(T.jum-T.kaw)}</td></tr>`;
+  tk.innerHTML=`<thead>${head}</thead><tbody>${body}${totRow}</tbody>`;
+}
+
+function detailHTML(o){
+  // funnel (trace kat mana)
+  const stages=[['Jumlah '+(TAB==='borang'?'Borang':'F2'),o.jum,'#0f2044'],['Diterima Kawalan',o.kaw,'#2563eb'],['Hantar Batching',o.bat,'#f59e0b'],['Prosesan Terima',o.ter,'#10b981']];
+  const funnel=`<div><h5>Jejak Pipeline — kedudukan borang sekarang</h5><div class="funnel">`+
+    stages.map(([l,v,c])=>`<div class="frow"><span class="fl">${l}</span><span class="ft"><i style="width:${pct(v,o.jum)}%;background:${c}"></i></span><span class="fv">${fmt(v)} · ${pct(v,o.jum)}%</span></div>`).join('')+
+    `</div><div style="font-size:.72rem;color:var(--muted);margin-top:8px">Belum hantar kawalan: <b>${fmt(o.jum-o.kaw)}</b></div></div>`;
+  // by code
+  const codes=Object.keys(o.byCode).filter(c=>c!=='null').map(Number).sort((a,b)=>a-b);
+  const codeRows=codes.map(c=>{const d=o.byCode[c];return `<tr><td class="l">Kod ${c}</td><td>${fmt(d.bil)}</td><td>${fmt(d.kaw)}</td><td>${fmt(d.ter)}</td></tr>`;}).join('');
+  const codeTbl=`<div><h5>Pecahan ikut Kod${TAB==='borang'?'':' (LK)'} — kod apa yang diterima</h5>
+    <table class="dt2"><thead><tr><th class="l">Kod Respon</th><th>Bil</th><th>Diterima Kawalan</th><th>Prosesan Terima</th></tr></thead><tbody>${codeRows}</tbody></table></div>`;
+  // by status
+  const statRows=STATUSES.filter(s=>o.byStatus[s]).map(s=>{const d=o.byStatus[s];return `<tr><td class="l"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${SC[s]};margin-right:6px"></span>${s}</td><td>${fmt(d.bil)}</td><td>${fmt(d.kaw)}</td><td>${fmt(d.ter)}</td></tr>`;}).join('');
+  const statTbl=`<div><h5>Pecahan ikut Status Rekod — berapa diterima melalui status</h5>
+    <table class="dt2"><thead><tr><th class="l">Status Rekod</th><th>Bil</th><th>Diterima Kawalan</th><th>Prosesan Terima</th></tr></thead><tbody>${statRows}</tbody></table></div>`;
+  return `<div class="det-in">${statTbl}${codeTbl}${funnel}<div></div></div>`;
+}
+
+function toggle(fe){if(openSet.has(fe))openSet.delete(fe);else openSet.add(fe);render();}
+
+/* DEMO */
+function genDemo(){
+  const fes=['QISTINA','HANA','NUAIM','ZAWANI','MAISARAH','IKHWAN','NAJWA','ALFIAN','AIMAN','AINUDDIN','UYAINAH','SYIMAH'];
+  const pens=['nursyuzalawaty','suhaina.wahab','ahmadmaliki'];const fasas=['Fasa 2 - Selain NPI','Fasa 3'];const sv=['337 - Runcit','308 - Hartanah'];
+  const codes=['11-Lengkap','50-Salah','14-Akaun','21-Alamat','22-Tiada','23-Pindah','31-Tak operasi','40-Tutup'];
+  const rek=['Dalam Proses','Semakan SMD','Selesai'];const mo=['May','Jun'];const rows=[];
+  for(let i=0;i<900;i++){const r=new Array(43).fill('');
+    r[COL.FASA]=fasas[Math.random()>.85?1:0];r[COL.NO_SIRI]='S'+i;r[COL.PENYELIA]=pens[i%3];r[COL.FE]=fes[i%fes.length];r[COL.AP_SURVEI]=sv[Math.random()>.25?0:1];
+    if(Math.random()>.45){const c=codes[(Math.random()*codes.length)|0];r[COL.P_RESP]=c;r[COL.Q_REKOD]=rek[(Math.random()*rek.length)|0];
+      if(Math.random()>.7)r[COL.L_KAWALAN]=(1+(Math.random()*27|0))+'-'+mo[(Math.random()*2)|0]+'-26';}
+    rows.push(r);}
+  return rows;
+}
+
+setInterval(()=>{const u=document.getElementById('url').value.trim();if(u&&rawRows.length)loadData();},10*60*1000);
+(function(){const i=document.getElementById('url');if(DEFAULT_URL){i.value=DEFAULT_URL;loadData();}else{showLoad(false);document.getElementById('err').style.display='block';}})();
+</script>
+</body>
+</html>
