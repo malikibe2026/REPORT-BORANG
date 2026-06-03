@@ -45,7 +45,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:16px}
 .scard{background:var(--card);border-radius:var(--radius);padding:18px 18px 15px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden}
 .scard::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.scard.b::after{background:var(--blue2)}.scard.g::after{background:var(--green)}.scard.c::after{background:var(--cyan)}.scard.r::after{background:var(--red)}
+.scard.b::after{background:var(--blue2)}.scard.g::after{background:var(--green)}.scard.c::after{background:var(--cyan)}.scard.r::after{background:var(--red)}.scard.gd::after{background:var(--gold)}
 .scard .lab{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
 .scard .val{font-family:var(--mono);font-size:1.85rem;font-weight:500;color:var(--navy);line-height:1}
 .scard .s{font-size:.7rem;color:var(--muted);margin-top:6px}
@@ -186,7 +186,9 @@ function aggregate(rows){
     const c=rcode(r), st=rekodOf(r);
     const k=hasD(r,COL.L_KAWALAN), b=(hasD(r,COL.M_BATCHING)||String(r[COL.N_NO_BATCH]||'').trim()), t=hasD(r,COL.O_PROSESAN);
     if(k)o.kaw++; if(b)o.bat++; if(t)o.ter++;
-    const cc=(o.byCode[c]=o.byCode[c]||{bil:0,kaw:0,ter:0}); cc.bil++; if(k)cc.kaw++; if(t)cc.ter++;
+    const cc=(o.byCode[c]=o.byCode[c]||{bil:0,sel:0,smd:0,proses:0,pinda:0,kaw:0,bat:0,ter:0}); cc.bil++;
+    if(st==='Selesai')cc.sel++;else if(st==='Semakan SMD')cc.smd++;else if(st==='Dalam Proses')cc.proses++;else if(st==='Pinda Semula')cc.pinda++;
+    if(k)cc.kaw++; if(b)cc.bat++; if(t)cc.ter++;
     const ss=(o.byStatus[st]=o.byStatus[st]||{bil:0,kaw:0,ter:0}); ss.bil++; if(k)ss.kaw++; if(t)ss.ter++;
   });
   return Object.values(m);
@@ -211,8 +213,9 @@ function renderSummary(rows,list){
   const uni=TAB==='borang'?'Borang (Kod 11 & 50)':'F2 (Kes LK 12–60)';
   const C=(lab,val,cls,s)=>`<div class="scard ${cls}"><div class="lab">${lab}</div><div class="val">${val}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
   document.getElementById('summary').innerHTML=
-    C('Jumlah '+(TAB==='borang'?'Borang':'F2'),fmt(jum),'b',uni)+
-    C('Diterima Kawalan',fmt(kaw),'g',pct(kaw,jum)+'% drp jumlah')+
+    C('Jumlah MKO '+(TAB==='borang'?'Borang':'F2'),fmt(jum),'b',uni)+
+    C('Kawalan Terima',fmt(kaw),'g',pct(kaw,jum)+'% drp jumlah')+
+    C('Hantar Batching',fmt(bat),'gd',pct(bat,jum)+'% drp jumlah')+
     C('Prosesan Terima',fmt(ter),'c',pct(ter,jum)+'% drp jumlah')+
     C('Baki Belum Kawalan',fmt(jum-kaw),'r','perlu hantar kawalan');
   // status overview stacked bar
@@ -233,46 +236,43 @@ function renderTable(list){
   document.getElementById('tk-title').textContent = TAB==='borang'?'Jejak Borang (Kod 11 & 50) mengikut FE':'Jejak F2 / Lebih Kawalan (LK) mengikut FE';
   document.getElementById('tk-cnt').textContent = list.length+' FE · klik baris untuk butiran';
   const tk=document.getElementById('tk');
-  if(!list.length){tk.innerHTML='';document.querySelector('#tk').innerHTML='<tbody><tr><td class="empty">Tiada FE dalam tapisan ini.</td></tr></tbody>';return;}
+  if(!list.length){tk.innerHTML='<tbody><tr><td class="empty">Tiada FE dalam tapisan ini.</td></tr></tbody>';return;}
   const borang=TAB==='borang';
   const head = borang
-    ? `<tr><th>Nama FE</th><th>Penyelia</th><th class="num">Jumlah</th><th class="num">Kod 11</th><th class="num">Kod 50</th><th>Status Rekod</th><th>Diterima Kawalan</th><th>Prosesan Terima</th><th class="num">Baki Kawalan</th></tr>`
-    : `<tr><th>Nama FE</th><th>Penyelia</th><th class="num">Jumlah</th><th>Status Rekod</th><th>Diterima Kawalan</th><th>Prosesan Terima</th><th class="num">Baki Kawalan</th></tr>`;
-  const cols = borang?9:7;
+    ? `<tr><th>Nama FE</th><th>Penyelia</th><th class="num">Jumlah MKO</th><th class="num">Kod 11</th><th class="num">Kod 50</th><th>Status Rekod</th><th>Kawalan Terima</th><th>Hantar Batching</th><th>Prosesan Terima</th><th class="num">Baki Kawalan</th></tr>`
+    : `<tr><th>Nama FE</th><th>Penyelia</th><th class="num">Jumlah MKO</th><th>Status Rekod</th><th>Kawalan Terima</th><th>Hantar Batching</th><th>Prosesan Terima</th><th class="num">Baki Kawalan</th></tr>`;
+  const cols = borang?10:8;
   let body='';
-  const T={jum:0,k11:0,k50:0,kaw:0,ter:0};
-  list.forEach((o,i)=>{
+  const T={jum:0,k11:0,k50:0,kaw:0,bat:0,ter:0};
+  list.forEach((o)=>{
     const k11=(o.byCode[11]||{}).bil||0, k50=(o.byCode[50]||{}).bil||0;
-    T.jum+=o.jum;T.k11+=k11;T.k50+=k50;T.kaw+=o.kaw;T.ter+=o.ter;
+    T.jum+=o.jum;T.k11+=k11;T.k50+=k50;T.kaw+=o.kaw;T.bat+=o.bat;T.ter+=o.ter;
     const open=openSet.has(o.fe);
     const main = borang
-      ? `<td><div class="fen"><span class="caret">▶</span>${o.fe}</div></td><td><span class="pen-badge">${o.pen}</span></td><td class="num">${fmt(o.jum)}</td><td class="num">${fmt(k11)}</td><td class="num">${fmt(k50)}</td><td>${statusBar(o)}</td><td>${progBar(o.kaw,o.jum,'#2563eb')}</td><td>${progBar(o.ter,o.jum,'#10b981')}</td><td class="num">${fmt(o.jum-o.kaw)}</td>`
-      : `<td><div class="fen"><span class="caret">▶</span>${o.fe}</div></td><td><span class="pen-badge">${o.pen}</span></td><td class="num">${fmt(o.jum)}</td><td>${statusBar(o)}</td><td>${progBar(o.kaw,o.jum,'#2563eb')}</td><td>${progBar(o.ter,o.jum,'#10b981')}</td><td class="num">${fmt(o.jum-o.kaw)}</td>`;
+      ? `<td><div class="fen"><span class="caret">▶</span>${o.fe}</div></td><td><span class="pen-badge">${o.pen}</span></td><td class="num">${fmt(o.jum)}</td><td class="num">${fmt(k11)}</td><td class="num">${fmt(k50)}</td><td>${statusBar(o)}</td><td>${progBar(o.kaw,o.jum,'#2563eb')}</td><td>${progBar(o.bat,o.jum,'#f59e0b')}</td><td>${progBar(o.ter,o.jum,'#10b981')}</td><td class="num">${fmt(o.jum-o.kaw)}</td>`
+      : `<td><div class="fen"><span class="caret">▶</span>${o.fe}</div></td><td><span class="pen-badge">${o.pen}</span></td><td class="num">${fmt(o.jum)}</td><td>${statusBar(o)}</td><td>${progBar(o.kaw,o.jum,'#2563eb')}</td><td>${progBar(o.bat,o.jum,'#f59e0b')}</td><td>${progBar(o.ter,o.jum,'#10b981')}</td><td class="num">${fmt(o.jum-o.kaw)}</td>`;
     body+=`<tr class="fe ${open?'open':''}" onclick="toggle('${o.fe.replace(/'/g,"\\'")}')">${main}</tr>`;
     body+=`<tr class="det" style="${open?'':'display:none'}"><td colspan="${cols}">${open?detailHTML(o):''}</td></tr>`;
   });
   const totRow = borang
-    ? `<tr class="tot"><td>JUMLAH</td><td></td><td class="num">${fmt(T.jum)}</td><td class="num">${fmt(T.k11)}</td><td class="num">${fmt(T.k50)}</td><td></td><td class="num">${fmt(T.kaw)} (${pct(T.kaw,T.jum)}%)</td><td class="num">${fmt(T.ter)} (${pct(T.ter,T.jum)}%)</td><td class="num">${fmt(T.jum-T.kaw)}</td></tr>`
-    : `<tr class="tot"><td>JUMLAH</td><td></td><td class="num">${fmt(T.jum)}</td><td></td><td class="num">${fmt(T.kaw)} (${pct(T.kaw,T.jum)}%)</td><td class="num">${fmt(T.ter)} (${pct(T.ter,T.jum)}%)</td><td class="num">${fmt(T.jum-T.kaw)}</td></tr>`;
+    ? `<tr class="tot"><td>JUMLAH</td><td></td><td class="num">${fmt(T.jum)}</td><td class="num">${fmt(T.k11)}</td><td class="num">${fmt(T.k50)}</td><td></td><td class="num">${fmt(T.kaw)} (${pct(T.kaw,T.jum)}%)</td><td class="num">${fmt(T.bat)} (${pct(T.bat,T.jum)}%)</td><td class="num">${fmt(T.ter)} (${pct(T.ter,T.jum)}%)</td><td class="num">${fmt(T.jum-T.kaw)}</td></tr>`
+    : `<tr class="tot"><td>JUMLAH</td><td></td><td class="num">${fmt(T.jum)}</td><td></td><td class="num">${fmt(T.kaw)} (${pct(T.kaw,T.jum)}%)</td><td class="num">${fmt(T.bat)} (${pct(T.bat,T.jum)}%)</td><td class="num">${fmt(T.ter)} (${pct(T.ter,T.jum)}%)</td><td class="num">${fmt(T.jum-T.kaw)}</td></tr>`;
   tk.innerHTML=`<thead>${head}</thead><tbody>${body}${totRow}</tbody>`;
 }
 
 function detailHTML(o){
-  // funnel (trace kat mana)
-  const stages=[['Jumlah '+(TAB==='borang'?'Borang':'F2'),o.jum,'#0f2044'],['Diterima Kawalan',o.kaw,'#2563eb'],['Hantar Batching',o.bat,'#f59e0b'],['Prosesan Terima',o.ter,'#10b981']];
-  const funnel=`<div><h5>Jejak Pipeline — kedudukan borang sekarang</h5><div class="funnel">`+
+  const codes=Object.keys(o.byCode).filter(c=>c!=='null').map(Number).sort((a,b)=>a-b);
+  const T={bil:0,sel:0,smd:0,proses:0,pinda:0,kaw:0,bat:0,ter:0};
+  const rows=codes.map(c=>{const d=o.byCode[c];['bil','sel','smd','proses','pinda','kaw','bat','ter'].forEach(k=>T[k]+=d[k]);
+    return `<tr><td class="l">Kod ${c}</td><td>${fmt(d.bil)}</td><td>${fmt(d.sel)}</td><td>${fmt(d.smd)}</td><td>${fmt(d.proses)}</td><td>${fmt(d.pinda)}</td><td>${fmt(d.kaw)}</td><td>${fmt(d.bat)}</td><td>${fmt(d.ter)}</td></tr>`;}).join('');
+  const totR=`<tr style="font-weight:700;background:#eef4ff"><td class="l">JUMLAH</td><td>${fmt(T.bil)}</td><td>${fmt(T.sel)}</td><td>${fmt(T.smd)}</td><td>${fmt(T.proses)}</td><td>${fmt(T.pinda)}</td><td>${fmt(T.kaw)}</td><td>${fmt(T.bat)}</td><td>${fmt(T.ter)}</td></tr>`;
+  const matrix=`<div style="grid-column:1/-1"><h5>Status Rekod &amp; Aliran mengikut Kod — Jumlah MKO → Kawalan → Batching → Prosesan</h5>
+    <table class="dt2"><thead><tr><th class="l">Kod Respon</th><th>Jumlah MKO</th><th>Selesai</th><th>Semakan SMD</th><th>Dalam Proses</th><th>Pinda Semula</th><th>Kawalan Terima</th><th>Hantar Batching</th><th>Prosesan Terima</th></tr></thead><tbody>${rows}${totR}</tbody></table></div>`;
+  const stages=[['Jumlah MKO',o.jum,'#0f2044'],['Kawalan Terima',o.kaw,'#2563eb'],['Hantar Batching',o.bat,'#f59e0b'],['Prosesan Terima',o.ter,'#10b981']];
+  const funnel=`<div style="grid-column:1/-1"><h5>Aliran Keseluruhan FE — kedudukan borang sekarang</h5><div class="funnel">`+
     stages.map(([l,v,c])=>`<div class="frow"><span class="fl">${l}</span><span class="ft"><i style="width:${pct(v,o.jum)}%;background:${c}"></i></span><span class="fv">${fmt(v)} · ${pct(v,o.jum)}%</span></div>`).join('')+
     `</div><div style="font-size:.72rem;color:var(--muted);margin-top:8px">Belum hantar kawalan: <b>${fmt(o.jum-o.kaw)}</b></div></div>`;
-  // by code
-  const codes=Object.keys(o.byCode).filter(c=>c!=='null').map(Number).sort((a,b)=>a-b);
-  const codeRows=codes.map(c=>{const d=o.byCode[c];return `<tr><td class="l">Kod ${c}</td><td>${fmt(d.bil)}</td><td>${fmt(d.kaw)}</td><td>${fmt(d.ter)}</td></tr>`;}).join('');
-  const codeTbl=`<div><h5>Pecahan ikut Kod${TAB==='borang'?'':' (LK)'} — kod apa yang diterima</h5>
-    <table class="dt2"><thead><tr><th class="l">Kod Respon</th><th>Bil</th><th>Diterima Kawalan</th><th>Prosesan Terima</th></tr></thead><tbody>${codeRows}</tbody></table></div>`;
-  // by status
-  const statRows=STATUSES.filter(s=>o.byStatus[s]).map(s=>{const d=o.byStatus[s];return `<tr><td class="l"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${SC[s]};margin-right:6px"></span>${s}</td><td>${fmt(d.bil)}</td><td>${fmt(d.kaw)}</td><td>${fmt(d.ter)}</td></tr>`;}).join('');
-  const statTbl=`<div><h5>Pecahan ikut Status Rekod — berapa diterima melalui status</h5>
-    <table class="dt2"><thead><tr><th class="l">Status Rekod</th><th>Bil</th><th>Diterima Kawalan</th><th>Prosesan Terima</th></tr></thead><tbody>${statRows}</tbody></table></div>`;
-  return `<div class="det-in">${statTbl}${codeTbl}${funnel}<div></div></div>`;
+  return `<div class="det-in">${matrix}${funnel}</div>`;
 }
 
 function toggle(fe){if(openSet.has(fe))openSet.delete(fe);else openSet.add(fe);render();}
