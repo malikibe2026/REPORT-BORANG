@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laporan Berpages BE2026 – Unit Harga-Harga</title>
+<title>Laporan Analisis BE2026 – Unit Harga-Harga</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -99,7 +99,7 @@ table.rt .hl{background:#2563eb!important;color:#fff;font-weight:700}
 <div id="load"><div class="spn"></div><div>Memuatkan data BE2026...</div></div>
 
 <div class="bar">
-  <span class="t">📄 LAPORAN BERPAGES BE2026</span>
+  <span class="t">📊 LAPORAN ANALISIS BE2026</span>
   <label>Fasa</label><select id="f-fasa" onchange="render()"><option value="">Semua</option><option value="2">Fasa 2</option><option value="3">Fasa 3</option></select>
   <label>Survei</label><select id="f-survei" onchange="render()"><option value="">Semua</option><option value="Hartanah">Hartanah</option><option value="Runcit">Runcit</option></select>
   <label>Daerah</label><select id="f-daerah" onchange="render()"><option value="">Semua</option></select>
@@ -154,11 +154,12 @@ function applyScope(){const a=document.getElementById('f-fasa').value,b=document
 /* per-FE aggregate (shared) */
 function feAgg(rows){
   const m={};
-  rows.forEach(x=>{const fe=feName(x);const o=(m[fe]=m[fe]||{fe,pen:penName(x),agi:0,k11:0,k50:0,lk:0,kodb:0,kawB:0,kawF2:0,kaw:0,bat:0,ter:0});
+  rows.forEach(x=>{const fe=feName(x);const o=(m[fe]=m[fe]||{fe,pen:penName(x),agi:0,k11:0,k50:0,lk:0,kodb:0,kawB:0,kawF2:0,kaw:0,bat:0,batB:0,ter:0,terB:0});
     o.agi++;const g=rgroup(x);if(g==='k11')o.k11++;else if(g==='k50')o.k50++;else if(g==='lk')o.lk++;else if(g==='kodb')o.kodb++;
-    if(hasD(x,COL.L_KAWALAN)){o.kaw++;if(g==='k11'||g==='k50')o.kawB++;else o.kawF2++;}
-    if(hasD(x,COL.M_BATCHING)||String(x[COL.N_NO_BATCH]||'').trim())o.bat++;
-    if(hasD(x,COL.O_PROSESAN))o.ter++;});
+    const isB=(g==='k11'||g==='k50');
+    if(hasD(x,COL.L_KAWALAN)){o.kaw++;if(isB)o.kawB++;else o.kawF2++;}
+    if(hasD(x,COL.M_BATCHING)||String(x[COL.N_NO_BATCH]||'').trim()){o.bat++;if(isB)o.batB++;}
+    if(hasD(x,COL.O_PROSESAN)){o.ter++;if(isB)o.terB++;}});
   return Object.values(m).map(o=>{o.siap=siapOf(o);o.cap=pct(o.siap,o.agi);o.baki=o.agi-o.siap;return o;});
 }
 
@@ -167,47 +168,15 @@ function render(){
   if(!rawRows.length)return;
   applyScope();
   const today=new Date().toLocaleString('ms-MY'),scope=scopeText();
-  window.__head=(sub,ic)=>`<div class="rpt-head"><div class="l"><div class="badge">${ic||'📄'}</div><div><h1>LAPORAN PENGHANTARAN BORANG BE2026</h1><p>${sub}</p></div></div><div class="r"><div class="tag">DOSM SELANGOR · UHH</div><div>Skop: <span class="scope">${scope}</span></div><div>Kemaskini: ${today}</div></div></div>`;
-  window.__foot=n=>`<div class="foot"><span>Laporan Penghantaran Borang BE2026 · Unit Harga-Harga</span><span>Halaman ${n} / ${NPAGE}</span></div>`;
+  window.__head=(sub,ic)=>`<div class="rpt-head"><div class="l"><div class="badge">${ic||'📄'}</div><div><h1>LAPORAN ANALISIS BE2026</h1><p>${sub}</p></div></div><div class="r"><div class="tag">DOSM SELANGOR · UHH</div><div>Skop: <span class="scope">${scope}</span></div><div>Kemaskini: ${today}</div></div></div>`;
+  window.__foot=n=>`<div class="foot"><span>Laporan Analisis BE2026 · Unit Harga-Harga</span><span>Halaman ${n} / ${NPAGE}</span></div>`;
   document.getElementById('report').innerHTML =
-    pageSummary()+pageRanking()+pagePenyelia()+pageFE()+pageDaerah()+pagePMKS()+pageK5();
+    pageRanking()+pagePenyelia()+pageFE()+pageHantarBorang()+pageDaerah()+pagePMKS()+pageK5();
   drawCharts();
 }
 function P(inner){return `<div class="page">${inner}</div>`;}
 
-/* ── 1 RINGKASAN ── */
-function pageSummary(){
-  const r=curRows,t=r.length;let k11=0,k50=0,lk=0,kodb=0,belum=0,hart=0,runc=0,kaw=0;
-  const fe=new Set(),pen=new Set(),batch=new Set();
-  r.forEach(x=>{fe.add(feName(x));pen.add(penName(x));const g=rgroup(x);if(g==='k11')k11++;else if(g==='k50')k50++;else if(g==='lk')lk++;else if(g==='kodb')kodb++;else belum++;const sv=surveiOf(x);if(sv==='Hartanah')hart++;else if(sv==='Runcit')runc++;if(hasD(x,COL.L_KAWALAN))kaw++;const bn=String(x[COL.N_NO_BATCH]||'').trim();if(bn)batch.add(bn);});
-  const siap=k11+k50+lk+kodb,capai=pct(siap,t);
-  const C=(l,v,c,s,i)=>`<div class="sc ${c||''}">${i?`<div class="ic">${i}</div>`:''}<div class="lab">${l}</div><div class="val">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
-  return P(__head('Ringkasan Keseluruhan · Rangka Kawalan Fasa 2 &amp; 3','📊')+
-   `<div class="sec-h">Ringkasan KPI</div>
-    <div class="sgrid">
-      ${C('Jumlah FE Aktif',fmt(fe.size),'n','&nbsp;','🧑‍🔧')}
-      ${C('Jumlah Agihan (No SIRI)',fmt(t),'','&nbsp;','📋')}
-      ${C('Siap MKO',fmt(siap),'g',`<b>${capai}%</b> · 11+50+LK+KodB`,'✅')}
-      ${C('Belum Respon',fmt(belum),'r',pct(belum,t)+'%','⬜')}
-    </div>
-    <div class="sgrid" style="margin-top:13px">
-      ${C('Kod 11',fmt(k11),'g',pct(k11,t)+'%','1️⃣')}
-      ${C('Kod 50',fmt(k50),'gd','&nbsp;','5️⃣')}
-      ${C('LK (12–60)',fmt(lk),'p',pct(lk,t)+'%','📝')}
-      ${C('Kod B (61–77)',fmt(kodb),'c',pct(kodb,t)+'%','⏳')}
-    </div>
-    <div class="sgrid" style="margin-top:13px">
-      ${C('Hartanah (308)',fmt(hart),'c',pct(hart,t)+'%','🏢')}
-      ${C('Runcit (337)',fmt(runc),'a',pct(runc,t)+'%','🛒')}
-      ${C('Hantar Kawalan',fmt(kaw),'g',pct(kaw,t)+'%','📤')}
-      ${C('Jumlah Batch (unik)',fmt(batch.size),'n','&nbsp;','🔢')}
-    </div>
-    <div class="grow"></div>
-    <div class="note">Siap MKO = rekod yang mempunyai sebarang kod respon (Kod 11 + 50 + LK 12–60 + Kod B 61–77). Belum Respon = belum ada status K7. Batching &amp; Prosesan Terima akan terisi apabila peringkat tersebut bermula.</div>
-    ${__foot(1)}`);
-}
-
-/* ── 2 RANKING ── */
+/* ── 1 RANKING (Siap MKO) ── */
 function pageRanking(){
   const arr=feAgg(curRows).slice().sort((a,b)=>b.siap-a.siap||b.kaw-a.kaw);
   const top=arr.slice(0,3);
@@ -215,17 +184,13 @@ function pageRanking(){
   const podium=`<div class="podium">${pod(top[1],'p2','🥈')}${pod(top[0],'p1','🥇')}${pod(top[2],'p3','🥉')}</div>`;
   const medal=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span class="rkno">${i+1}</span>`;
   const rows=arr.map((o,i)=>`<tr><td style="text-align:center">${medal(i)}</td><td class="l">${o.fe}</td><td class="l">${o.pen}</td><td>${fmt(o.agi)}</td><td class="hl">${fmt(o.siap)}</td><td>${o.cap}%</td><td>${fmt(o.kaw)}</td></tr>`).join('');
-  const byKaw=feAgg(curRows).slice().sort((a,b)=>b.kaw-a.kaw).slice(0,8).filter(o=>o.kaw>0);
-  const kawRows=byKaw.map((o,i)=>`<tr><td style="text-align:center">${medal(i)}</td><td class="l">${o.fe}</td><td class="l">${o.pen}</td><td class="hl">${fmt(o.kaw)}</td><td>${fmt(o.kawB)}</td><td>${fmt(o.kawF2)}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:#94a3b8">Tiada hantar kawalan lagi</td></tr>';
-  return P(__head('Ranking Prestasi FE · Siap MKO &amp; Hantar Kawalan','🏆')+
+  return P(__head('Ranking Prestasi FE · Siap MKO','🏆')+
    `<div class="sec-h">🏆 Kedudukan Teratas · Siap MKO</div>
     ${podium}
-    <div class="sec-h">Ranking Penuh — Siap MKO <small>(banyak MKO ke sedikit)</small></div>
+    <div class="sec-h">Ranking Penuh — Siap MKO <small>(semua FE · banyak ke sedikit)</small></div>
     <div class="tw"><table class="rt"><thead><tr><th style="width:46px">#</th><th class="l">Nama FE</th><th class="l">Penyelia</th><th>Agihan</th><th>Siap MKO</th><th>% Capai</th><th>Hantar Kawalan</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div class="sec-h" style="margin-top:18px">📤 Ranking — Hantar Borang pada Kawalan <small>(Top 8)</small></div>
-    <div class="tw"><table class="rt"><thead><tr><th style="width:46px">#</th><th class="l">Nama FE</th><th class="l">Penyelia</th><th>Hantar Kawalan</th><th>Borang (11+50)</th><th>F2 (selain)</th></tr></thead><tbody>${kawRows}</tbody></table></div>
-    <div class="note">Ranking Siap MKO disusun ikut jumlah kes yang ada respon (Kod 11+50+LK+Kod B). Ranking Hantar Kawalan disusun ikut bilangan borang yang telah dimasukkan ke kawalan (lajur L).</div>
-    ${__foot(2)}`);
+    <div class="note">Ranking disusun ikut jumlah kes yang ada respon. Siap MKO = Kod 11+50+LK+Kod B.</div>
+    ${__foot(1)}`);
 }
 
 /* ── 3 BY PENYELIA ── */
@@ -244,19 +209,35 @@ function pagePenyelia(){
     </thead><tbody>${ent.map(o=>row(o,false)).join('')}${row(T,true)}</tbody></table></div>
     <div class="grow"></div>
     <div class="note">Penerimaan Borang = Kod 11 berstatus <b>Selesai</b> yang telah ada Tarikh Prosesan Terima. % Penerimaan = Penerimaan ÷ Kod 11 Selesai. Baki Penerimaan = Kod 11 Selesai − Penerimaan.</div>
-    ${__foot(3)}`);
+    ${__foot(2)}`);
 }
 
-/* ── 4 BY FE ── */
+/* ── 3 MKO BY FE ── */
 function pageFE(){
   const arr=feAgg(curRows).slice().sort((a,b)=>b.cap-a.cap);
   const T={agi:0,k11:0,k50:0,lk:0,kodb:0,kaw:0,bat:0,ter:0,siap:0,baki:0};arr.forEach(o=>['agi','k11','k50','lk','kodb','kaw','bat','ter','siap','baki'].forEach(k=>T[k]+=o[k]));T.cap=pct(T.siap,T.agi);
-  const row=(o,tot)=>`<tr class="${tot?'tot':''}"><td class="l">${tot?'JUMLAH':o.fe}</td><td class="l">${tot?'':o.pen}</td><td>${fmt(o.agi)}</td><td>${fmt(o.k11)}</td><td>${fmt(o.k50)}</td><td>${fmt(o.lk)}</td><td>${fmt(o.kodb)}</td><td>${fmt(o.kaw)}</td><td>${fmt(o.bat)}</td><td>${fmt(o.ter)}</td><td class="hl">${fmt(o.siap)}</td><td>${o.cap}%</td><td>${fmt(o.baki)}</td></tr>`;
-  return P(__head('Laporan By FE · Pencapaian Penghantaran Borang','👤')+
-   `<div class="sec-h">Prestasi Pegawai Lapangan (FE) <small>(diisih ikut % Capai)</small></div>
-    <div class="tw"><table class="rt"><thead><tr><th class="l">Nama FE</th><th class="l">Penyelia</th><th>Agihan</th><th>Kod 11</th><th>Kod 50</th><th>LK</th><th>Kod B</th><th>Hantar Kawalan</th><th>Hantar Batching</th><th>Prosesan Terima</th><th>Siap MKO</th><th>% Capai</th><th>Baki Agihan</th></tr></thead><tbody>${arr.map(o=>row(o,false)).join('')}${row(T,true)}</tbody></table></div>
+  const row=(o,tot)=>`<tr class="${tot?'tot':''}"><td class="l">${tot?'JUMLAH':o.fe}</td><td class="l">${tot?'':o.pen}</td><td>${fmt(o.agi)}</td><td>${fmt(o.k11)}</td><td>${fmt(o.k50)}</td><td>${fmt(o.lk)}</td><td>${pct(o.lk,o.agi)}%</td><td>${fmt(o.kodb)}</td><td>${fmt(o.kaw)}</td><td>${fmt(o.bat)}</td><td>${fmt(o.ter)}</td><td class="hl">${fmt(o.siap)}</td><td>${o.cap}%</td><td>${fmt(o.baki)}</td></tr>`;
+  return P(__head('Laporan MKO By FE · Pencapaian MKO Pegawai Lapangan','👤')+
+   `<div class="sec-h">Laporan MKO Pegawai Lapangan (FE) <small>(diisih ikut % Capai)</small></div>
+    <div class="tw"><table class="rt"><thead><tr><th class="l">Nama FE</th><th class="l">Penyelia</th><th>Agihan</th><th>Kod 11</th><th>Kod 50</th><th>LK</th><th>% LK</th><th>Kod B</th><th>Hantar Kawalan</th><th>Hantar Batching</th><th>Prosesan Terima</th><th>Siap MKO</th><th>% Capai</th><th>Baki Kes</th></tr></thead><tbody>${arr.map(o=>row(o,false)).join('')}${row(T,true)}</tbody></table></div>
     <div class="grow"></div>
-    <div class="note">Siap MKO = Kod 11 + 50 + LK + Kod B. % Capai = Siap MKO ÷ Agihan. Baki Agihan = Agihan − Siap MKO (kes belum ada respon).</div>
+    <div class="note">Siap MKO = Kod 11 + 50 + LK + Kod B. % LK = LK ÷ Agihan. % Capai = Siap MKO ÷ Agihan. Baki Kes = Agihan − Siap MKO (kes belum ada respon).</div>
+    ${__foot(3)}`);
+}
+
+/* ── 4 HANTAR BORANG BY FE (Kod 11 & 50) ── */
+function pageHantarBorang(){
+  const arr=feAgg(curRows).slice().sort((a,b)=>b.kawB-a.kawB||(b.k11+b.k50)-(a.k11+a.k50)||a.fe.localeCompare(b.fe));
+  const medal=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span class="rkno">${i+1}</span>`;
+  const row=(o,i)=>{const jum=o.k11+o.k50,baki=jum-o.kawB;return `<tr><td style="text-align:center">${medal(i)}</td><td class="l">${o.fe}</td><td class="l">${o.pen}</td><td>${fmt(o.k11)}</td><td>${fmt(o.k50)}</td><td>${fmt(jum)}</td><td class="hl">${fmt(o.kawB)}</td><td>${fmt(o.batB)}</td><td>${fmt(o.terB)}</td><td>${pct(o.kawB,jum)}%</td><td>${fmt(baki)}</td></tr>`;};
+  const T={k11:0,k50:0,kawB:0,batB:0,terB:0};arr.forEach(o=>['k11','k50','kawB','batB','terB'].forEach(k=>T[k]+=o[k]));
+  const Tj=T.k11+T.k50;
+  const totRow=`<tr class="tot"><td></td><td class="l">JUMLAH</td><td class="l"></td><td>${fmt(T.k11)}</td><td>${fmt(T.k50)}</td><td>${fmt(Tj)}</td><td class="hl">${fmt(T.kawB)}</td><td>${fmt(T.batB)}</td><td>${fmt(T.terB)}</td><td>${pct(T.kawB,Tj)}%</td><td>${fmt(Tj-T.kawB)}</td></tr>`;
+  return P(__head('Laporan Hantar Borang By FE · Kod 11 & 50 Sahaja','📤')+
+   `<div class="sec-h">📤 Laporan Hantar Borang — Kod 11 &amp; 50 <small>(semua FE · ranking ikut paling banyak hantar)</small></div>
+    <div class="tw"><table class="rt"><thead><tr><th style="width:46px">#</th><th class="l">Nama FE</th><th class="l">Penyelia</th><th>Kod 11</th><th>Kod 50</th><th>Jumlah Borang</th><th>Hantar Kawalan</th><th>Hantar Batching</th><th>Prosesan Terima</th><th>% Hantar</th><th>Baki Hantar</th></tr></thead><tbody>${arr.map((o,i)=>row(o,i)).join('')}${totRow}</tbody></table></div>
+    <div class="grow"></div>
+    <div class="note">Hanya kes <b>Kod 11 &amp; 50 (borang utama)</b> dikira; LK &amp; Kod B tidak termasuk. Hantar Kawalan = borang dimasukkan ke kawalan (lajur L). % Hantar = Hantar Kawalan ÷ Jumlah Borang. Baki Hantar = Jumlah Borang − Hantar Kawalan.</div>
     ${__foot(4)}`);
 }
 
