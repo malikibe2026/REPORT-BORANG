@@ -7,13 +7,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
 <style>
 :root{
@@ -92,15 +85,7 @@ tr.total.row-ok td{background:#dcfce7}tr.total.row-mid td{background:#fef3c7}tr.
 .chart-wrap{position:relative;height:240px}
 .chart-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:.8rem}
 
-#fe-table_wrapper{padding:0}
-#fe-table_wrapper .dataTables_filter input{border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-family:var(--font);font-size:.82rem}
-#fe-table_wrapper .dt-buttons button{background:var(--navy2);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:.78rem;font-family:var(--font);font-weight:600;cursor:pointer;margin-right:4px}
-table#fe-table{font-size:.77rem}
-table#fe-table th{background:var(--navy2);color:#fff;font-size:.69rem;letter-spacing:.03em;text-transform:uppercase;padding:9px;white-space:nowrap}
-table#fe-table td{padding:7px 9px;border-bottom:1px solid #f0f3fa;white-space:nowrap}
-table#fe-table td:nth-child(n+3){font-family:var(--mono);text-align:right}
-table#fe-table tr.row-ok td{background:#f0fdf4}table#fe-table tr.row-mid td{background:#fffbeb}table#fe-table tr.row-low td{background:#fef2f2}
-.dataTables_paginate .paginate_button.current{background:var(--blue2)!important;color:#fff!important;border-radius:5px;border:none!important}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:20px;margin-bottom:20px}
 
 #loading-overlay{position:fixed;inset:0;background:rgba(10,22,40,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
 .spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.15);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
@@ -144,8 +129,7 @@ table#fe-table tr.row-ok td{background:#f0fdf4}table#fe-table tr.row-mid td{back
   <div class="spacer"></div>
   <a class="btn btn-dark" href="laporan.html" style="text-decoration:none">📄 Laporan Berpages</a>
   <a class="btn btn-dark" href="fe_tracker_details.html" style="text-decoration:none">🔎 FE Tracker</a>
-  <button class="btn btn-dark" onclick="window.print()">🖨️ Simpan PDF</button>
-  <button class="btn btn-dark" onclick="sendEmail()">✉️ Hantar Email</button>
+  <a class="btn btn-dark" href="borang_f2_tracker.html" style="text-decoration:none">📍 Borang &amp; F2 Tracker</a>
   <div class="urlwrap">
     <input type="text" id="sheet-url" placeholder="URL Google Sheet (CSV) ...">
     <button class="btn" onclick="loadData()">⟳ Muat</button>
@@ -164,9 +148,13 @@ table#fe-table tr.row-ok td{background:#f0fdf4}table#fe-table tr.row-mid td{back
 
   <div class="sec-title"><h2>Analisis Komposisi</h2><div class="sec-divider"></div></div>
   <div class="grid-3">
-    <div class="chart-card"><h3>📊 Fasa BE2026 (11 / 50 / LK / Kod B / Belum)</h3><div class="chart-wrap"><canvas id="chart-fasa"></canvas></div></div>
-    <div class="chart-card"><h3>🍩 Hartanah vs Runcit · Unit Harga-Harga</h3><div class="chart-wrap"><canvas id="chart-survei"></canvas></div></div>
-    <div class="chart-card"><h3>🥧 Komposisi Status Response</h3><div class="chart-wrap"><canvas id="chart-resp"></canvas></div></div>
+    <div class="chart-card"><h3>🎯 Pencapaian Siap MKO</h3><div class="chart-wrap"><canvas id="chart-siap"></canvas></div></div>
+    <div class="chart-card"><h3>🍩 Hartanah vs Runcit · UHH</h3><div class="chart-wrap"><canvas id="chart-survei"></canvas></div></div>
+    <div class="chart-card"><h3>🍩 Komposisi Status Response</h3><div class="chart-wrap"><canvas id="chart-resp"></canvas></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="chart-card"><h3>📊 Komposisi Respon mengikut Fasa</h3><div class="chart-wrap"><canvas id="chart-fasa"></canvas></div></div>
+    <div class="chart-card"><h3>📶 Komposisi Respon mengikut Penyelia (100%)</h3><div class="chart-wrap"><canvas id="chart-penyelia-komp"></canvas></div></div>
   </div>
 
   <div class="sec-title"><h2>Analisis Tarikh</h2><div class="sec-divider"></div></div>
@@ -180,18 +168,7 @@ table#fe-table tr.row-ok td{background:#f0fdf4}table#fe-table tr.row-mid td{back
   <div class="card"><div class="card-head">🧑‍💼 Group by ID Penyelia &nbsp;<span style="font-weight:400;color:var(--muted);font-size:.74rem">· Siap MKO = Kod 11+50+LK+Kod B · Baki Agihan = Agihan − Siap MKO</span></div>
     <div class="card-body" style="overflow-x:auto"><table class="dash-table" id="tbl-penyelia"></table></div></div>
 
-  <div class="sec-title"><h2>Prestasi Pegawai Lapangan (FE)</h2><div class="pill" id="pill-target2">Sasaran 45%</div><div class="sec-divider"></div></div>
-  <div class="card"><div class="card-head">👤 Senarai Prestasi FE <span style="font-weight:400;color:var(--muted);font-size:.74rem">· Siap MKO = Kod 11+50+LK+Kod B · Kawalan: Borang=11+50, F2=selain · Baki Agihan = Agihan − Siap MKO</span></div>
-    <div class="card-body" style="overflow-x:auto">
-      <table id="fe-table" class="display" style="width:100%">
-        <thead><tr>
-          <th>Nama FE</th><th>Penyelia</th><th>Agihan</th><th>Kod 11</th><th>Kod 50</th><th>LK</th><th>Kod B</th>
-          <th>Kawalan Borang</th><th>Kawalan F2</th><th>Batching</th><th>Terima</th>
-          <th>Siap MKO</th><th>% Capai</th><th>Baki Agihan</th><th>Status</th>
-        </tr></thead>
-        <tbody id="fe-tbody"></tbody>
-      </table>
-    </div></div>
+  <div style="margin:4px 0 0;font-size:.8rem;color:var(--muted)">👤 Prestasi terperinci mengikut FE kini di <a href="fe_tracker_details.html" style="color:var(--blue2);font-weight:600;text-decoration:none">🔎 FE Tracker</a> &amp; <a href="borang_f2_tracker.html" style="color:var(--blue2);font-weight:600;text-decoration:none">📍 Borang &amp; F2 Tracker</a> — dipisahkan supaya dashboard ini ringan.</div>
 
   <div class="dashboard-footer">Laporan Penghantaran Borang BE2026 · Unit Harga-Harga · data dimuat terus dari Google Sheet · paparan point-in-time</div>
 </div>
@@ -206,8 +183,12 @@ const COL={FASA:0,NO_SIRI:1,PENYELIA:2,FE:3,L_KAWALAN:11,M_BATCHING:12,N_NO_BATC
 /* Logik respon: 11=Kod 11 · 50=Kod 50 · 12–60=LK · 61–77=Kod B · kosong=Belum.  Siap = 11+50+LK */
 const DEFAULT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSUeV4tfzv1ErhjT3e3o7P1lRO42zXMBb76TBHmUDe7lFHqS313TRIxol6nboeQIqYBsxo4FQrBdP8u/pub?gid=998975185&single=true&output=csv';
 
-let rawRows=[],curRows=[],feTable=null,charts={};
-if(window.Chart) Chart.defaults.animation=false;
+let rawRows=[],curRows=[],charts={};
+if(window.Chart){
+  Chart.defaults.animation=false;
+  Chart.defaults.font.family="'Plus Jakarta Sans'";
+  Chart.register({id:'centerText',afterDraw(c,a,o){if(!o||!o.text)return;const ca=c.chartArea;const x=(ca.left+ca.right)/2,y=(ca.top+ca.bottom)/2;const ctx=c.ctx;ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=o.color||'#0a1628';ctx.font="700 "+(o.size||27)+"px 'Plus Jakarta Sans'";ctx.fillText(o.text,x,y-7);if(o.sub){ctx.font="600 11px 'Plus Jakarta Sans'";ctx.fillStyle='#64748b';ctx.fillText(o.sub,x,y+15);}ctx.restore();}});
+}
 
 /* ═══ UTILS ═══ */
 function fmt(n){return (n==null||isNaN(n))?'0':Number(n).toLocaleString('ms-MY');}
@@ -273,8 +254,7 @@ function applyFilters(){
   document.getElementById('pill-scope').textContent=scope;
   const tg=getTarget();
   document.getElementById('pill-target1').textContent='Sasaran '+tg+'%';
-  document.getElementById('pill-target2').textContent='Sasaran '+tg+'%';
-  renderKPI(curRows);renderOperasi(curRows);renderComposition(curRows);renderTrends(curRows);renderPenyelia(curRows);renderFE(curRows);
+  renderKPI(curRows);renderOperasi(curRows);renderComposition(curRows);renderTrends(curRows);renderPenyelia(curRows);
 }
 
 /* ═══ STATS ═══ */
@@ -345,27 +325,45 @@ function renderOperasi(rows){
 
 /* ═══ CHARTS ═══ */
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-function donutOpts(){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:"'Plus Jakarta Sans'",size:11}}}}};}
+const PAL={k11:'#10b981',k50:'#f59e0b',lk:'#8b5cf6',kodb:'#06b6d4',belum:'#e2e8f0'};
+function donutOpts(extra){return{responsive:true,maintainAspectRatio:false,cutout:'58%',layout:{padding:4},
+  plugins:{legend:{position:'bottom',labels:{font:{family:"'Plus Jakarta Sans'",size:11},padding:10,usePointStyle:true,pointStyle:'circle'}},
+    tooltip:{callbacks:{label:ctx=>{const t=ctx.dataset.data.reduce((a,b)=>a+(+b||0),0);return ' '+ctx.label+': '+fmt(ctx.parsed)+' ('+pct(ctx.parsed,t)+'%)';}}},
+    ...(extra||{})}};}
+function doughnut(id,labels,data,colors,extra,cutout){
+  destroyChart(id);const el=document.getElementById(id);if(!el)return;
+  const o=donutOpts(extra);if(cutout)o.cutout=cutout;
+  charts[id]=new Chart(el,{type:'doughnut',data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:o});
+}
 function renderComposition(rows){
+  const s=stats(rows),capai=pct(s.siap,s.total);
+  doughnut('chart-siap',['Siap MKO','Belum Respon'],[s.siap,s.belum],['#10b981','#eef2f7'],{centerText:{text:capai+'%',sub:'Siap MKO'}},'72%');
+  doughnut('chart-survei',['Hartanah (308)','Runcit (337)'],[s.hartanah,s.runcit],['#06b6d4','#38bdf8'],null,'58%');
+  doughnut('chart-resp',['Kod 11','Kod 50','LK','Kod B','Belum'],[s.k11,s.k50,s.lk,s.kodb,s.belum],['#10b981','#f59e0b','#8b5cf6','#06b6d4','#ef4444'],null,'52%');
   const fa={'2':{k11:0,k50:0,lk:0,kodb:0,belum:0},'3':{k11:0,k50:0,lk:0,kodb:0,belum:0}};
-  rows.forEach(r=>{const f=fasaOf(r);if(!fa[f])return;const g=respGroup(r);fa[f][g==='k11'?'k11':g==='k50'?'k50':g==='lk'?'lk':g==='kodb'?'kodb':'belum']++;});
+  rows.forEach(r=>{const f=fasaOf(r);if(!fa[f])return;fa[f][respGroup(r)]++;});
   destroyChart('chart-fasa');
   charts['chart-fasa']=new Chart(document.getElementById('chart-fasa'),{type:'bar',
     data:{labels:['Fasa 2','Fasa 3'],datasets:[
-      {label:'Kod 11',data:[fa['2'].k11,fa['3'].k11],backgroundColor:'#10b981'},
-      {label:'Kod 50',data:[fa['2'].k50,fa['3'].k50],backgroundColor:'#f59e0b'},
-      {label:'LK',data:[fa['2'].lk,fa['3'].lk],backgroundColor:'#8b5cf6'},
-      {label:'Kod B',data:[fa['2'].kodb,fa['3'].kodb],backgroundColor:'#06b6d4'},
-      {label:'Belum',data:[fa['2'].belum,fa['3'].belum],backgroundColor:'#e2e8f0'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
-      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:10}}}}}});
-  const s=stats(rows);
-  destroyChart('chart-survei');
-  charts['chart-survei']=new Chart(document.getElementById('chart-survei'),{type:'doughnut',
-    data:{labels:['Hartanah (308)','Runcit (337)'],datasets:[{data:[s.hartanah,s.runcit],backgroundColor:['#06b6d4','#38bdf8'],borderWidth:2,borderColor:'#fff'}]},options:donutOpts()});
-  destroyChart('chart-resp');
-  charts['chart-resp']=new Chart(document.getElementById('chart-resp'),{type:'pie',
-    data:{labels:['Kod 11','Kod 50','LK','Kod B','Belum'],datasets:[{data:[s.k11,s.k50,s.lk,s.kodb,s.belum],backgroundColor:['#10b981','#f59e0b','#8b5cf6','#06b6d4','#ef4444'],borderWidth:2,borderColor:'#fff'}]},options:donutOpts()});
+      {label:'Kod 11',data:[fa['2'].k11,fa['3'].k11],backgroundColor:PAL.k11,borderRadius:4},
+      {label:'Kod 50',data:[fa['2'].k50,fa['3'].k50],backgroundColor:PAL.k50,borderRadius:4},
+      {label:'LK',data:[fa['2'].lk,fa['3'].lk],backgroundColor:PAL.lk,borderRadius:4},
+      {label:'Kod B',data:[fa['2'].kodb,fa['3'].kodb],backgroundColor:PAL.kodb,borderRadius:4},
+      {label:'Belum',data:[fa['2'].belum,fa['3'].belum],backgroundColor:PAL.belum,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},usePointStyle:true,pointStyle:'circle',padding:8}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:10}},grid:{color:'#eef2f7'}}}}});
+  const pm={};
+  rows.forEach(r=>{const p=penyeliaName(r);const o=(pm[p]=pm[p]||{k11:0,k50:0,lk:0,kodb:0,belum:0,t:0});o[respGroup(r)]++;o.t++;});
+  const pens=Object.keys(pm).sort((a,b)=>pm[b].t-pm[a].t);
+  const grp=[['k11','Kod 11',PAL.k11],['k50','Kod 50',PAL.k50],['lk','LK',PAL.lk],['kodb','Kod B',PAL.kodb],['belum','Belum',PAL.belum]];
+  const raw={};grp.forEach(g=>raw[g[0]]=pens.map(p=>pm[p][g[0]]));
+  destroyChart('chart-penyelia-komp');
+  charts['chart-penyelia-komp']=new Chart(document.getElementById('chart-penyelia-komp'),{type:'bar',
+    data:{labels:pens,datasets:grp.map(g=>({label:g[1],data:pens.map(p=>pm[p].t?Math.round(pm[p][g[0]]/pm[p].t*1000)/10:0),backgroundColor:g[2],borderRadius:4,_raw:raw[g[0]]}))},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},usePointStyle:true,pointStyle:'circle',padding:8}},
+        tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.x+'% ('+fmt(ctx.dataset._raw[ctx.dataIndex])+')'}}},
+      scales:{x:{stacked:true,max:100,ticks:{font:{size:10},callback:v=>v+'%'},grid:{color:'#eef2f7'}},y:{stacked:true,grid:{display:false},ticks:{font:{size:11}}}}}});
 }
 
 /* ═══ TRENDS ═══ */
@@ -413,60 +411,6 @@ function renderPenyelia(rows){
   document.getElementById('tbl-penyelia').innerHTML=`
     <thead><tr><th>ID Penyelia</th><th class="num">Bil FE</th><th class="num">Agihan</th><th class="num">Kod 11</th><th class="num">Kod 50</th><th class="num">LK</th><th class="num">Kod B</th><th class="num">Belum</th><th class="num">Kawalan</th><th class="num">Siap</th><th class="num">% Capai</th><th class="num">Baki Agihan</th><th>Status</th></tr></thead>
     <tbody>${ent.map(([n,d])=>rowHTML(n,d,false)).join('')}${rowHTML('JUMLAH',T,true)}</tbody>`;
-}
-
-/* ═══ FE TABLE ═══ */
-function renderFE(rows){
-  const tg=getTarget(),m={};
-  rows.forEach(r=>{const fe=feName(r);const o=(m[fe]=m[fe]||{pen:penyeliaName(r),agi:0,k11:0,k50:0,lk:0,kodb:0,kawB:0,kawF2:0,bat:0,ter:0});
-    o.agi++;const g=respGroup(r);
-    if(g==='k11')o.k11++;else if(g==='k50')o.k50++;else if(g==='lk')o.lk++;else if(g==='kodb')o.kodb++;
-    if(hasDate(r,COL.L_KAWALAN)){if(g==='k11'||g==='k50')o.kawB++;else o.kawF2++;}
-    if(hasDate(r,COL.M_BATCHING)||String(r[COL.N_NO_BATCH]||'').trim())o.bat++;
-    if(hasDate(r,COL.O_PROSESAN))o.ter++;});
-  document.getElementById('fe-tbody').innerHTML=Object.entries(m).map(([fe,d])=>{
-    const siap=d.k11+d.k50+d.lk+d.kodb,cap=pct(siap,d.agi),bakiAgi=d.agi-siap,st=statusOf(cap,tg);
-    return `<tr class="${st.r}"><td>${fe}</td><td style="text-align:left;font-family:var(--font)">${d.pen}</td><td>${fmt(d.agi)}</td><td>${fmt(d.k11)}</td><td>${fmt(d.k50)}</td><td>${fmt(d.lk)}</td><td>${fmt(d.kodb)}</td><td>${fmt(d.kawB)}</td><td>${fmt(d.kawF2)}</td><td>${fmt(d.bat)}</td><td>${fmt(d.ter)}</td><td>${fmt(siap)}</td><td>${cap}%</td><td>${fmt(bakiAgi)}</td><td><span class="st ${st.c}">${st.t}</span></td></tr>`;
-  }).join('');
-  if(feTable){feTable.destroy();feTable=null;}
-  feTable=$('#fe-table').DataTable({dom:'Bfrtip',
-    buttons:[{extend:'csv',text:'⬇ Export CSV',filename:'prestasi_fe_be2026'}],
-    pageLength:15,order:[[12,'desc']],scrollX:true,stripeClasses:[],
-    language:{search:'Cari:',paginate:{previous:'‹',next:'›'},info:'Paparan _START_–_END_ drp _TOTAL_ FE',lengthMenu:'Papar _MENU_',zeroRecords:'Tiada rekod',infoEmpty:'Tiada rekod',infoFiltered:'(ditapis drp _MAX_)'},
-    columnDefs:[{targets:'_all',className:'dt-right'},{targets:[0,1],className:''},{targets:12,render:(d,t)=>(t==='sort'||t==='type')?parseFloat(d):d}]});
-}
-
-/* ═══ HANTAR EMAIL (mailto dengan ringkasan) ═══ */
-function sendEmail(){
-  if(!curRows.length){alert('Tiada data.');return;}
-  const s=stats(curRows),tg=getTarget(),cap=pct(s.siap,s.total),bk=baki(s.siap,s.total,tg);
-  const scope=document.getElementById('pill-scope').textContent;
-  const tarikh=new Date().toLocaleString('ms-MY');
-  const subject=`Laporan Penghantaran Borang BE2026 — ${scope} (${new Date().toLocaleDateString('ms-MY')})`;
-  const body=
-`LAPORAN PENGHANTARAN BORANG BE2026 — Unit Harga-Harga
-Skop: ${scope}
-Kemaskini: ${tarikh}
-
-RINGKASAN KPI
-- Jumlah FE Aktif : ${fmt(s.fe.size)}
-- Jumlah Agihan (No SIRI) : ${fmt(s.total)}
-- Kod 11 : ${fmt(s.k11)} (${pct(s.k11,s.total)}%)
-- Kod 50 : ${fmt(s.k50)}
-- LK (12-60) : ${fmt(s.lk)} (${pct(s.lk,s.total)}%)
-- Kod B (61-77) : ${fmt(s.kodb)}
-- Belum Respon : ${fmt(s.belum)} (${pct(s.belum,s.total)}%)
-- Hartanah (308) : ${fmt(s.hartanah)} | Runcit (337) : ${fmt(s.runcit)}
-- Hantar Kawalan : ${fmt(s.kaw.t)}
-- Jumlah Batch (unik) : ${fmt(s.batch.size)}
-
-PENCAPAIAN (Siap MKO = Kod 11+50+LK+Kod B)
-- Siap : ${fmt(s.siap)} (${cap}%)
-- Sasaran : ${tg}%
-- Baki perlu hantar : ${fmt(bk)}
-
-(Sila lampirkan fail PDF laporan yang disimpan melalui butang "Simpan PDF".)`;
-  window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
 }
 
 /* ═══ DEMO ═══ */
