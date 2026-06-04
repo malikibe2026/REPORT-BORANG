@@ -27,8 +27,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .hr a{color:#cfe0fb;text-decoration:none}
 .filters{background:#fff;border-bottom:1px solid var(--border);padding:13px 32px;display:flex;gap:15px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:40;box-shadow:0 1px 8px rgba(10,22,40,.04)}
 .fg{display:flex;align-items:center;gap:7px}
-.fg label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.fg select,.fg input{border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.82rem;font-family:var(--font);color:var(--text);background:#fff}
+.fg label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.fg select,.fg input{border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.85rem;font-family:var(--font);color:var(--text);background:#fff}
 .fg select{cursor:pointer;min-width:120px}.fg input{width:200px}
 .fg select:focus,.fg input:focus{outline:none;border-color:var(--blue2)}
 .filters .sp{flex:1}
@@ -50,19 +50,32 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .tcard-head{padding:14px 20px;border-bottom:1px solid var(--border);font-size:.82rem;font-weight:700;color:var(--navy2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .tcard-head .cnt{font-weight:400;color:var(--muted);font-size:.75rem}
 .tcard-body{padding:14px 18px}
-table#tk{width:100%;font-size:.78rem}
-table#tk thead th{background:var(--navy2);color:#fff;font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;padding:9px 10px;white-space:nowrap;border:none}
-table#tk tbody td{padding:7px 10px;border-bottom:1px solid #f0f3fa}
-table#tk tbody tr:hover td{background:#f5f8ff}
-td.mono{font-family:var(--mono)}
-.nm{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pen-badge{display:inline-block;background:#eef2f8;color:#475569;border-radius:7px;padding:2px 8px;font-size:.7rem;font-weight:600}
-.stg{display:inline-block;padding:3px 10px;border-radius:11px;font-size:.68rem;font-weight:700;letter-spacing:.02em;white-space:nowrap}
-.stg-fe{background:#f1f5f9;color:#475569}.stg-kaw{background:#dbeafe;color:#1d4ed8}.stg-bat{background:#fef3c7;color:#92400e}.stg-pros{background:#d1fae5;color:#065f46}
-#tk_wrapper .dt-buttons{margin-bottom:10px}
-#tk_wrapper .dt-buttons button{background:var(--navy2);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:.78rem;font-family:var(--font);font-weight:600;cursor:pointer;margin-right:5px}
-.dataTables_paginate .paginate_button.current{background:var(--blue2)!important;color:#fff!important;border-radius:5px;border:none!important}
-.dataTables_info,.dataTables_length{font-size:.78rem;color:var(--muted)}
+table#tk{width:100%;font-size:.85rem;border-collapse:collapse}
+table#tk thead th{background:var(--navy2);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:11px 12px;white-space:nowrap;border:none;text-align:left}
+table#tk tbody td{padding:9px 12px;border-bottom:1px solid #eef2f8;color:var(--text);vertical-align:middle}
+table#tk tbody tr:nth-child(even) td{background:#f8fafd}
+table#tk tbody tr:hover td{background:#eaf2ff}
+td.mono{font-family:var(--mono);font-size:.82rem;color:#334155}
+td.idcell{font-family:var(--mono);font-weight:500;color:var(--navy2)}
+.rownum{color:var(--muted);font-family:var(--mono);font-size:.78rem;text-align:right;width:46px}
+.nm{max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:var(--navy2)}
+.fe-cell{font-weight:700;color:#0f2044}
+.pen-badge{display:inline-block;background:#eef2f8;color:#475569;border-radius:7px;padding:3px 9px;font-size:.72rem;font-weight:600}
+.kod-chip{display:inline-block;min-width:28px;text-align:center;background:#e0e7ff;color:#3730a3;border-radius:7px;padding:2px 8px;font-family:var(--mono);font-size:.75rem;font-weight:600}
+.kod-none{color:var(--slate)}
+.stg{display:inline-block;padding:3px 11px;border-radius:11px;font-size:.71rem;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.stg-fe{background:#eef1f5;color:#475569}.stg-kaw{background:#dbeafe;color:#1d4ed8}.stg-bat{background:#fef3c7;color:#92400e}.stg-pros{background:#d1fae5;color:#065f46}
+.rek{display:inline-block;padding:2px 9px;border-radius:8px;font-size:.72rem;font-weight:600;white-space:nowrap}
+.rek-sel{background:#d1fae5;color:#065f46}.rek-smd{background:#dbeafe;color:#1d4ed8}.rek-proses{background:#fef3c7;color:#92400e}.rek-pinda{background:#ede9fe;color:#5b21b6}.rek-none{color:var(--slate)}
+#tk_wrapper{padding-top:4px}
+#tk_wrapper .dt-buttons{margin-bottom:12px}
+#tk_wrapper .dt-buttons button{background:var(--navy2);color:#fff;border:none;border-radius:8px;padding:7px 15px;font-size:.8rem;font-family:var(--font);font-weight:600;cursor:pointer;margin-right:6px}
+#tk_wrapper .dt-buttons button:hover{background:var(--navy)}
+.dataTables_paginate{margin-top:10px}
+.dataTables_paginate .paginate_button{font-size:.82rem!important;padding:5px 11px!important;border-radius:6px!important}
+.dataTables_paginate .paginate_button.current{background:var(--blue2)!important;color:#fff!important;border-radius:6px;border:none!important}
+.dataTables_info,.dataTables_length{font-size:.82rem;color:var(--muted)}
+.dataTables_length select{padding:3px 6px;border-radius:6px;border:1px solid var(--border)}
 #load{position:fixed;inset:0;background:rgba(10,22,40,.72);display:flex;align-items:center;justify-content:center;z-index:9999;color:#fff;flex-direction:column;gap:14px}
 .spin{width:42px;height:42px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -83,7 +96,8 @@ td.mono{font-family:var(--mono)}
   <div class="fg"><label>Jenis</label><select id="f-jenis" onchange="apply()"><option value="">Semua Rekod</option><option value="borang">Borang (11 & 50)</option><option value="f2">F2 / LK (12–60)</option></select></div>
   <div class="fg"><label>Keberadaan</label><select id="f-stage" onchange="apply()"><option value="">Semua</option><option value="Masih di FE">Masih di FE</option><option value="Di Kawalan">Di Kawalan</option><option value="Batching">Batching</option><option value="Prosesan Terima">Prosesan Terima</option></select></div>
   <div class="fg"><label>Fasa</label><select id="f-fasa" onchange="apply()"><option value="">Semua</option><option value="2">Fasa 2</option><option value="3">Fasa 3</option></select></div>
-  <div class="fg"><label>Penyelia</label><select id="f-pen" onchange="apply()"><option value="">Semua</option></select></div>
+  <div class="fg"><label>Penyelia</label><select id="f-pen" onchange="onPen()"><option value="">Semua</option></select></div>
+  <div class="fg"><label>FE</label><select id="f-fe" onchange="apply()"><option value="">Semua</option></select></div>
   <div class="fg"><label>Cari</label><input type="text" id="f-q" placeholder="No ID / nama pendaftaran..." oninput="apply()"></div>
   <div class="sp"></div>
   <div class="urlw"><input type="text" id="url" placeholder="URL CSV ..."><button class="btn" onclick="loadData()">⟳ Muat</button><button class="btn gh" onclick="loadDemo()">Demo</button></div>
@@ -95,7 +109,7 @@ td.mono{font-family:var(--mono)}
     <div class="tcard-head"><span id="tk-title">Senarai Borang</span><span class="cnt" id="tk-cnt"></span></div>
     <div class="tcard-body"><table id="tk" class="display" style="width:100%"></table></div>
   </div>
-  <div class="note">📌 <b>Cara baca:</b> "Keberadaan" menunjukkan peringkat terjauh borang itu — <b>Masih di FE</b> (belum hantar kawalan) → <b>Di Kawalan</b> → <b>Batching</b> → <b>Prosesan Terima</b>. Borang yang <b>tiada dalam senarai Kawalan/Batching/Prosesan</b> bermakna ia <b>masih di FE dan belum dihantar</b>. Guna penapis "Keberadaan" untuk lihat senarai bagi setiap peringkat, dan butang Export untuk muat turun senarai.</div>
+  <div class="note">📌 <b>Cara baca:</b> "Keberadaan" menunjukkan peringkat terjauh borang itu — <b>Masih di FE</b> (belum hantar kawalan) → <b>Di Kawalan</b> → <b>Batching</b> → <b>Prosesan Terima</b>. Borang yang <b>tiada dalam senarai Kawalan/Batching/Prosesan</b> bermakna ia <b>masih di FE dan belum dihantar</b>. Guna penapis <b>FE</b> untuk lihat status borang setiap pegawai, penapis <b>Keberadaan</b> untuk setiap peringkat, dan butang Export untuk muat turun senarai.</div>
 </div>
 <div id="err">⚠️ Tiada data. Pastikan URL CSV sah & helaian "Publish to web", atau klik <b>Demo</b>.</div>
 
@@ -143,6 +157,7 @@ function initData(rows){
   });
   const pens=[...new Set(allRecs.map(r=>r.pen))].sort();
   document.getElementById('f-pen').innerHTML='<option value="">Semua</option>'+pens.map(p=>`<option>${p}</option>`).join('');
+  populateFE();
   document.getElementById('upd').textContent=new Date().toLocaleString('ms-MY');
   document.getElementById('err').style.display='none';
   buildTable();
@@ -152,32 +167,44 @@ function initData(rows){
 
 function badge(stage){const cls=stage==='Masih di FE'?'stg-fe':stage==='Di Kawalan'?'stg-kaw':stage==='Batching'?'stg-bat':'stg-pros';return `<span class="stg ${cls}">${stage}</span>`;}
 
+function rekBadge(s){const t=(s||'').toLowerCase();if(t==='—'||!t)return '<span class="rek-none">—</span>';let c='rek-none';if(t.includes('selesai'))c='rek-sel';else if(t.includes('semak')||t.includes('smd'))c='rek-smd';else if(t.includes('proses'))c='rek-proses';else if(t.includes('pinda'))c='rek-pinda';return `<span class="rek ${c}">${s}</span>`;}
+function kodChip(d){return (d==='—'||!d)?'<span class="kod-none">—</span>':`<span class="kod-chip">${d}</span>`;}
 function buildTable(){
   if(dt){dt.destroy();dt=null;}
   dt=$('#tk').DataTable({
     data:[], deferRender:true, dom:'Blrtip', pageLength:25, lengthMenu:[[10,25,50,100],[10,25,50,100]],
-    order:[[6,'asc']], scrollX:true,
+    order:[[3,'asc'],[7,'asc']], scrollX:true,
     buttons:[{extend:'csv',text:'⬇ CSV',filename:'borang_f2_tracker'},{extend:'excel',text:'⬇ Excel',filename:'borang_f2_tracker'}],
     language:{paginate:{previous:'‹',next:'›'},info:'Paparan _START_–_END_ drp _TOTAL_ rekod',lengthMenu:'Papar _MENU_',zeroRecords:'Tiada rekod',infoEmpty:'Tiada rekod',infoFiltered:''},
     columns:[
-      {data:'siri',title:'No ID (NEWSS)',className:'mono'},
+      {title:'#',data:null,defaultContent:'',orderable:false,searchable:false,className:'rownum'},
+      {data:'siri',title:'No ID (NEWSS)',className:'idcell'},
       {data:'nama',title:'Nama Pendaftaran',render:(d,t)=>t==='display'?`<div class="nm" title="${(d||'').replace(/"/g,'&quot;')}">${d}</div>`:d},
-      {data:'fe',title:'FE'},
+      {data:'fe',title:'FE',render:(d,t)=>t==='display'?`<span class="fe-cell">${d}</span>`:d},
       {data:'pen',title:'Penyelia',render:(d,t)=>t==='display'?`<span class="pen-badge">${d}</span>`:d},
-      {data:'codeLabel',title:'Kod',className:'mono'},
-      {data:'status',title:'Status Rekod'},
+      {data:'codeLabel',title:'Kod',className:'mono',render:(d,t)=>t==='display'?kodChip(d):d},
+      {data:'status',title:'Status Rekod',render:(d,t)=>t==='display'?rekBadge(d):d},
       {data:'stage',title:'Keberadaan',render:(d,t)=>t==='display'?badge(d):d},
       {data:'noBatch',title:'No Batch',className:'mono'},
       {data:'tKaw',title:'Tkh Kawalan',className:'mono'},
       {data:'tBat',title:'Tkh Batching',className:'mono'},
       {data:'tPros',title:'Tkh Prosesan',className:'mono'},
-    ]
+    ],
+    drawCallback:function(){const api=this.api();const start=api.page.info().start;api.column(0,{page:'current'}).nodes().each((cell,i)=>{cell.innerHTML=start+i+1;});}
   });
 }
 
-function scope(){ // ditapis ikut jenis/fasa/penyelia (untuk kad ringkasan)
-  const j=document.getElementById('f-jenis').value,f=document.getElementById('f-fasa').value,p=document.getElementById('f-pen').value;
-  return allRecs.filter(r=>(!j||r.jenis===j)&&(!f||r.fasa===f)&&(!p||r.pen===p));
+function populateFE(){
+  const p=document.getElementById('f-pen').value, sel=document.getElementById('f-fe'), cur=sel.value;
+  const fes=[...new Set(allRecs.filter(r=>!p||r.pen===p).map(r=>r.fe))].sort((a,b)=>a.localeCompare(b,'ms'));
+  sel.innerHTML='<option value="">Semua</option>'+fes.map(f=>`<option>${f}</option>`).join('');
+  if(cur&&fes.includes(cur))sel.value=cur;
+}
+function onPen(){populateFE();apply();}
+
+function scope(){ // ditapis ikut jenis/fasa/penyelia/FE (untuk kad ringkasan)
+  const j=document.getElementById('f-jenis').value,f=document.getElementById('f-fasa').value,p=document.getElementById('f-pen').value,fe=document.getElementById('f-fe').value;
+  return allRecs.filter(r=>(!j||r.jenis===j)&&(!f||r.fasa===f)&&(!p||r.pen===p)&&(!fe||r.fe===fe));
 }
 
 function apply(){
@@ -200,7 +227,8 @@ function apply(){
   if(stg)data=data.filter(r=>r.stage===stg);
   if(q)data=data.filter(r=>r._s.includes(q));
   const jlabel={'':'Semua Rekod','borang':'Borang (Kod 11 & 50)','f2':'F2 / LK (Kod 12–60)'}[document.getElementById('f-jenis').value];
-  document.getElementById('tk-title').textContent='Senarai '+jlabel+(stg?(' · '+stg):'');
+  const feSel=document.getElementById('f-fe').value;
+  document.getElementById('tk-title').textContent='Senarai '+jlabel+(feSel?(' · FE: '+feSel):'')+(stg?(' · '+stg):'');
   document.getElementById('tk-cnt').textContent=fmt(data.length)+' rekod';
   dt.clear();dt.rows.add(data);dt.draw();
 }
