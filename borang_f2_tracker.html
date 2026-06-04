@@ -41,7 +41,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .scard{background:var(--card);border-radius:var(--radius);padding:17px 17px 14px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s}
 .scard:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(10,22,40,.12)}
 .scard::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.scard.b::after{background:var(--blue2)}.scard.s::after{background:var(--slate)}.scard.gd::after{background:var(--gold)}.scard.g::after{background:var(--green)}.scard.n::after{background:var(--navy2)}
+.scard.b::after{background:var(--blue2)}.scard.s::after{background:var(--slate)}.scard.gd::after{background:var(--gold)}.scard.g::after{background:var(--green)}.scard.n::after{background:var(--navy2)}.scard.p::after{background:var(--purple)}
+.scard.info{cursor:default}
 .scard.on{outline:2px solid var(--blue2);outline-offset:-2px}
 .scard .lab{font-size:.69rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
 .scard .val{font-family:var(--mono);font-size:1.8rem;font-weight:500;color:var(--navy);line-height:1}
@@ -50,9 +51,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .tcard-head{padding:14px 20px;border-bottom:1px solid var(--border);font-size:.82rem;font-weight:700;color:var(--navy2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .tcard-head .cnt{font-weight:400;color:var(--muted);font-size:.75rem}
 .tcard-body{padding:14px 18px}
-table#tk{width:100%;font-size:.85rem;border-collapse:collapse}
-table#tk thead th{background:var(--navy2);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:11px 12px;white-space:nowrap;border:none;text-align:left}
-table#tk tbody td{padding:9px 12px;border-bottom:1px solid #eef2f8;color:var(--text);vertical-align:middle}
+table#tk{width:100%;font-size:.85rem;border-collapse:collapse;border:1px solid #d7deea}
+table#tk thead th{background:var(--navy2);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:11px 12px;white-space:nowrap;border:1px solid rgba(255,255,255,.14);text-align:left}
+table#tk tbody td{padding:9px 12px;border:1px solid #e6ecf4;color:var(--text);vertical-align:middle}
 table#tk tbody tr:nth-child(even) td{background:#f8fafd}
 table#tk tbody tr:hover td{background:#eaf2ff}
 td.mono{font-family:var(--mono);font-size:.82rem;color:#334155}
@@ -98,6 +99,7 @@ td.idcell{font-family:var(--mono);font-weight:500;color:var(--navy2)}
   <div class="fg"><label>Fasa</label><select id="f-fasa" onchange="apply()"><option value="">Semua</option><option value="2">Fasa 2</option><option value="3">Fasa 3</option></select></div>
   <div class="fg"><label>Penyelia</label><select id="f-pen" onchange="onPen()"><option value="">Semua</option></select></div>
   <div class="fg"><label>FE</label><select id="f-fe" onchange="apply()"><option value="">Semua</option></select></div>
+  <div class="fg"><label>No Batch</label><select id="f-batch" onchange="apply()"><option value="">Semua</option></select></div>
   <div class="fg"><label>Cari</label><input type="text" id="f-q" placeholder="No ID / nama pendaftaran..." oninput="apply()"></div>
   <div class="sp"></div>
   <div class="urlw"><input type="text" id="url" placeholder="URL CSV ..."><button class="btn" onclick="loadData()">⟳ Muat</button><button class="btn gh" onclick="loadDemo()">Demo</button></div>
@@ -158,6 +160,8 @@ function initData(rows){
   const pens=[...new Set(allRecs.map(r=>r.pen))].sort();
   document.getElementById('f-pen').innerHTML='<option value="">Semua</option>'+pens.map(p=>`<option>${p}</option>`).join('');
   populateFE();
+  const batches=[...new Set(allRecs.map(r=>r.noBatch).filter(b=>b&&b!=='—'))].sort((a,b)=>a.localeCompare(b,'ms',{numeric:true}));
+  document.getElementById('f-batch').innerHTML='<option value="">Semua</option>'+batches.map(b=>`<option>${b}</option>`).join('');
   document.getElementById('upd').textContent=new Date().toLocaleString('ms-MY');
   document.getElementById('err').style.display='none';
   buildTable();
@@ -185,9 +189,9 @@ function buildTable(){
       {data:'codeLabel',title:'Kod',className:'mono',render:(d,t)=>t==='display'?kodChip(d):d},
       {data:'status',title:'Status Rekod',render:(d,t)=>t==='display'?rekBadge(d):d},
       {data:'stage',title:'Keberadaan',render:(d,t)=>t==='display'?badge(d):d},
-      {data:'noBatch',title:'No Batch',className:'mono'},
       {data:'tKaw',title:'Tkh Kawalan',className:'mono'},
       {data:'tBat',title:'Tkh Batching',className:'mono'},
+      {data:'noBatch',title:'No Batch',className:'mono'},
       {data:'tPros',title:'Tkh Prosesan',className:'mono'},
     ],
     drawCallback:function(){const api=this.api();const start=api.page.info().start;api.column(0,{page:'current'}).nodes().each((cell,i)=>{cell.innerHTML=start+i+1;});}
@@ -202,9 +206,9 @@ function populateFE(){
 }
 function onPen(){populateFE();apply();}
 
-function scope(){ // ditapis ikut jenis/fasa/penyelia/FE (untuk kad ringkasan)
-  const j=document.getElementById('f-jenis').value,f=document.getElementById('f-fasa').value,p=document.getElementById('f-pen').value,fe=document.getElementById('f-fe').value;
-  return allRecs.filter(r=>(!j||r.jenis===j)&&(!f||r.fasa===f)&&(!p||r.pen===p)&&(!fe||r.fe===fe));
+function scope(){ // ditapis ikut jenis/fasa/penyelia/FE/batch (untuk kad ringkasan)
+  const j=document.getElementById('f-jenis').value,f=document.getElementById('f-fasa').value,p=document.getElementById('f-pen').value,fe=document.getElementById('f-fe').value,b=document.getElementById('f-batch').value;
+  return allRecs.filter(r=>(!j||r.jenis===j)&&(!f||r.fasa===f)&&(!p||r.pen===p)&&(!fe||r.fe===fe)&&(!b||r.noBatch===b));
 }
 
 function apply(){
@@ -212,7 +216,8 @@ function apply(){
   const sc=scope();
   // summary by stage
   const st={'Masih di FE':0,'Di Kawalan':0,'Batching':0,'Prosesan Terima':0};
-  sc.forEach(r=>st[r.stage]++);
+  const ub=new Set();
+  sc.forEach(r=>{st[r.stage]++;if(r.noBatch&&r.noBatch!=='—')ub.add(r.noBatch);});
   const tot=sc.length;
   const C=(lab,val,cls,key)=>`<div class="scard ${cls} ${document.getElementById('f-stage').value===key?'on':''}" onclick="setStage('${key}')"><div class="lab">${lab}</div><div class="val">${fmt(val)}</div><div class="s">${key?pct(val,tot)+'% drp jumlah':'klik kad untuk tapis'}</div></div>`;
   document.getElementById('summary').innerHTML=
@@ -220,7 +225,8 @@ function apply(){
     C('Masih di FE',st['Masih di FE'],'s','Masih di FE')+
     C('Di Kawalan',st['Di Kawalan'],'b','Di Kawalan')+
     C('Batching',st['Batching'],'gd','Batching')+
-    C('Prosesan Terima',st['Prosesan Terima'],'g','Prosesan Terima');
+    C('Prosesan Terima',st['Prosesan Terima'],'g','Prosesan Terima')+
+    `<div class="scard p info"><div class="lab">Jumlah Batch</div><div class="val">${fmt(ub.size)}</div><div class="s">no batch unik</div></div>`;
   // table data = scope + stage + search
   const stg=document.getElementById('f-stage').value, q=document.getElementById('f-q').value.trim().toLowerCase();
   let data=sc;
