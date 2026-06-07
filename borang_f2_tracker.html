@@ -278,10 +278,25 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
   .header-inner{flex-direction:column;align-items:flex-start}
   .hr{text-align:left;margin-top:8px}
 }
+
+/* ===== LOADING SPINNER ===== */
+#load{
+  position:fixed;inset:0;background:rgba(10,22,40,.75);
+  display:flex;align-items:center;justify-content:center;
+  z-index:9999;color:#fff;flex-direction:column;gap:16px;
+  backdrop-filter:blur(4px)
+}
+.spin{
+  width:48px;height:48px;border:4px solid rgba(255,255,255,.2);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 <base target="_blank">
 </head>
 <body>
+<div id="load"><div class="spin"></div><div>Memuatkan data BE2026...</div></div>
 
 <div class="header"><div class="header-inner">
   <div class="hl"><div class="hbadge">📍</div><div><h1>BORANG & F2 TRACKER</h1><p>Keberadaan Setiap Borang · BE2026 · UHH</p></div></div>
@@ -313,6 +328,7 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
 
 <script>
 const COL={FASA:0,NO_SIRI:1,PENYELIA:2,FE:3,JENIS_DAFTAR:5,NEW_REG:6,BIZ_REG:7,NAMA_PERTUBUHAN:9,NAMA_PERNIAGAAN:10,L_KAWALAN:11,M_BATCHING:12,N_NO_BATCH:13,O_PROSESAN:14,P_RESP:15,Q_REKOD:16,AP_SURVEI:41};
+const DEFAULT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSUeV4tfzv1ErhjT3e3o7P1lRO42zXMBb76TBHmUDe7lFHqS313TRIxol6nboeQIqYBsxo4FQrBdP8u/pub?gid=998975185&single=true&output=csv';
 let allRecs=[],dt=null;
 
 const fmt=n=>(n==null||isNaN(n))?'0':Number(n).toLocaleString('ms-MY');
@@ -431,6 +447,10 @@ function apply(){
   dt.clear();dt.rows.add(data);dt.draw();
 }
 function setStage(s){document.getElementById('f-stage').value=s;apply();}
+
+setInterval(()=>{const u=document.getElementById('url').value.trim();if(u&&allRecs.length)loadData();},10*60*1000);
+
+(function(){const i=document.getElementById('url');if(DEFAULT_URL){i.value=DEFAULT_URL;loadData();}else{showLoad(false);document.getElementById('err').style.display='block';}})();
 </script>
 </body>
 </html>
