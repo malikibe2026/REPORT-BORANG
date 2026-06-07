@@ -51,13 +51,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .sec-title .pill{background:var(--blue2);color:#fff;border-radius:20px;padding:2px 10px;font-size:.68rem;font-weight:700;letter-spacing:.06em}
 .sec-divider{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);margin-left:8px}
 
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:14px}
-.kpi-card{background:var(--card);border-radius:var(--radius);padding:17px 17px 16px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.kpi-card{background:var(--card);border-radius:var(--radius);padding:14px 14px 13px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s}
 .kpi-card:hover{box-shadow:var(--shadow2);transform:translateY(-3px)}
 .kpi-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
-.kpi-badge{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:12px}
-.kpi-label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px;line-height:1.3;min-height:1.9em}
-.kpi-val{font-family:var(--mono);font-size:2.05rem;font-weight:600;color:var(--navy);line-height:1;letter-spacing:-.01em}
+.kpi-badge{width:35px;height:35px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;margin-bottom:9px}
+.kpi-label{font-size:.665rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;line-height:1.3;min-height:2.4em}
+.kpi-val{font-family:var(--mono);font-size:1.7rem;font-weight:600;color:var(--navy);line-height:1;letter-spacing:-.01em}
 .kpi-sub{font-size:.7rem;color:var(--muted);margin-top:8px;line-height:1.5}.kpi-sub b{color:var(--text);font-weight:700}
 .c-blue::before{background:var(--blue2)}.c-blue .kpi-badge{background:rgba(37,99,235,.12);color:var(--blue2)}
 .c-accent::before{background:var(--accent)}.c-accent .kpi-badge{background:rgba(56,189,248,.14);color:#0ea5e9}
@@ -99,6 +99,7 @@ tr.total.row-ok td{background:#dcfce7}tr.total.row-mid td{background:#fef3c7}tr.
 .err-msg{background:#fff5f5;border:1px solid #fed7d7;color:#9b2c2c;border-radius:var(--radius);padding:18px 22px;font-size:.85rem;margin-bottom:20px}
 .dashboard-footer{text-align:center;color:var(--muted);font-size:.74rem;padding:24px 0 8px}
 
+@media(max-width:1080px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.main{padding:16px}.header-inner{padding:16px}.filterbar{padding:10px 16px}.kpi-grid{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr}.urlwrap input{width:100%}}
 @media print{
   body{background:#fff}.filterbar{display:none}
@@ -148,11 +149,12 @@ tr.total.row-ok td{background:#dcfce7}tr.total.row-mid td{background:#fef3c7}tr.
   <div class="kpi-grid" id="kpi-grid"></div>
 
   <div class="sec-title"><h2>Analisis Komposisi</h2><div class="sec-divider"></div></div>
-  <div class="grid-2">
+  <div class="grid-3">
     <div class="chart-card"><h3>🎯 Pencapaian Siap MKO</h3><div class="chart-wrap"><canvas id="chart-siap"></canvas></div></div>
-    <div class="chart-card"><h3>📊 Komposisi Respon mengikut Fasa</h3><div class="chart-wrap"><canvas id="chart-fasa"></canvas></div></div>
+    <div class="chart-card"><h3>🧩 Komposisi Siap MKO · Kod 11 &amp; 50</h3><div class="chart-wrap"><canvas id="chart-siap-komp"></canvas></div></div>
+    <div class="chart-card"><h3>📤 Hantar Borang · drp Kod 11 &amp; 50</h3><div class="chart-wrap"><canvas id="chart-hantar"></canvas></div></div>
   </div>
-  <div class="chart-card"><h3>📊 Komposisi Mengikut Kod Respon <span style="font-weight:400;color:var(--muted);font-size:.72rem">· semua kod (11, 12, … 77) · tidak termasuk Belum Respon</span></h3><div class="chart-wrap" style="height:440px"><canvas id="chart-resp-codes"></canvas></div></div>
+  <div class="chart-card"><h3>📊 Komposisi Mengikut Kod Respon <span style="font-weight:400;color:var(--muted);font-size:.72rem">· semua kod · disusun ikut ranking (terbanyak dulu) · tidak termasuk Belum Respon</span></h3><div class="chart-wrap" style="height:440px"><canvas id="chart-resp-codes"></canvas></div></div>
   <div class="chart-card"><h3>📶 Komposisi Respon mengikut Penyelia (100%)</h3><div class="chart-wrap" style="height:230px"><canvas id="chart-penyelia-komp"></canvas></div></div>
 
   <div class="sec-title"><h2>Analisis Respon Mengikut Daerah Pentadbiran</h2><div class="pill" id="pill-target-d">Sasaran 45%</div><div class="sec-divider"></div></div>
@@ -350,10 +352,16 @@ function doughnut(id,labels,data,colors,extra,cutout){
 function renderComposition(rows){
   const s=stats(rows),capai=pct(s.siap,s.total);
   doughnut('chart-siap',['Siap MKO','Belum Respon'],[s.siap,s.belum],['#10b981','#eef2f7'],{centerText:{text:capai+'%',sub:'Siap MKO'}},'72%');
+  /* Komposisi Siap MKO -> tonjol Kod 11 & 50 */
+  const borang=s.k11+s.k50,pBor=pct(borang,s.siap);
+  doughnut('chart-siap-komp',['Kod 11','Kod 50','LK','Kod B'],[s.k11,s.k50,s.lk,s.kodb],['#10b981','#f59e0b','#8b5cf6','#06b6d4'],{centerText:{text:pBor+'%',sub:'Borang 11+50'}},'66%');
+  /* Hantar Borang daripada Kod 11 & 50 (lajur Kawalan) */
+  const hantarB=s.kaw.a,belumHantarB=Math.max(0,borang-hantarB),pHan=pct(hantarB,borang);
+  doughnut('chart-hantar',['Hantar Borang','Belum Hantar'],[hantarB,belumHantarB],['#2563eb','#eef2f7'],{centerText:{text:pHan+'%',sub:'Hantar'}},'72%');
   /* Komposisi mengikut SEMUA kod respon (bar, kecuali Belum) */
   const cm={};
   rows.forEach(r=>{const c=respCode(r);if(c===null)return;const v=String(r[COL.P_RESP]||'').trim();if(!cm[c])cm[c]={n:0,txt:v};cm[c].n++;});
-  const codes=Object.keys(cm).map(Number).sort((a,b)=>a-b);
+  const codes=Object.keys(cm).map(Number).sort((a,b)=>cm[b].n-cm[a].n);
   const cLab=codes.map(c=>{let t=cm[c].txt.replace(/^\s*\d+\s*[-\u2013]\s*/,'').replace(/\s+/g,' ').trim();if(t.length>36)t=t.slice(0,35)+'\u2026';return c+' \u00b7 '+t;});
   const cCol=codes.map(c=>c===11?PAL.k11:c===50?PAL.k50:(c>=12&&c<=60)?PAL.lk:PAL.kodb);
   destroyChart('chart-resp-codes');
@@ -363,18 +371,6 @@ function renderComposition(rows){
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.parsed.x)+' kes'}}},
       scales:{x:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'#eef2f7'}},y:{grid:{display:false},ticks:{font:{size:10.5}}}}}});
-  const fa={'2':{k11:0,k50:0,lk:0,kodb:0,belum:0},'3':{k11:0,k50:0,lk:0,kodb:0,belum:0}};
-  rows.forEach(r=>{const f=fasaOf(r);if(!fa[f])return;fa[f][respGroup(r)]++;});
-  destroyChart('chart-fasa');
-  charts['chart-fasa']=new Chart(document.getElementById('chart-fasa'),{type:'bar',
-    data:{labels:['Fasa 2','Fasa 3'],datasets:[
-      {label:'Kod 11',data:[fa['2'].k11,fa['3'].k11],backgroundColor:PAL.k11,borderRadius:4},
-      {label:'Kod 50',data:[fa['2'].k50,fa['3'].k50],backgroundColor:PAL.k50,borderRadius:4},
-      {label:'LK',data:[fa['2'].lk,fa['3'].lk],backgroundColor:PAL.lk,borderRadius:4},
-      {label:'Kod B',data:[fa['2'].kodb,fa['3'].kodb],backgroundColor:PAL.kodb,borderRadius:4},
-      {label:'Belum',data:[fa['2'].belum,fa['3'].belum],backgroundColor:PAL.belum,borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},usePointStyle:true,pointStyle:'circle',padding:8}}},
-      scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:10}},grid:{color:'#eef2f7'}}}}});
   const pm={};
   rows.forEach(r=>{const p=penyeliaName(r);const o=(pm[p]=pm[p]||{k11:0,k50:0,lk:0,kodb:0,belum:0,t:0});o[respGroup(r)]++;o.t++;});
   const pens=Object.keys(pm).sort((a,b)=>pm[b].t-pm[a].t);
