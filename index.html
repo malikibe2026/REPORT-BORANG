@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laporan MKO & Penghantaran Borang BE2026 – Unit Harga-Harga</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
@@ -30,7 +29,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .survey-tag{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:4px 14px;font-size:.74rem;font-weight:600;letter-spacing:.04em}
 .updated{font-size:.74rem;opacity:.65}.updated span{font-family:var(--mono);color:var(--accent);opacity:1}
 
-.filterbar{background:#fff;border-bottom:1px solid var(--border);padding:11px 32px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:50;box-shadow:0 1px 8px rgba(10,22,40,.04)}
+.filterbar{background:#fff;border-bottom:1px solid var(--border);padding:11px 32px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:50;box-shadow:0 1px 8px rgba(10,22,40,.04)}
 .fgroup{display:flex;align-items:center;gap:7px}
 .fgroup label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .fgroup select,.fgroup input[type=number]{border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.82rem;font-family:var(--font);color:var(--text);background:#fff;cursor:pointer}
@@ -44,6 +43,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .btn:hover{background:var(--blue)}.btn:active{transform:scale(.97)}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn-ghost:hover{background:var(--bg);color:var(--text)}
 .btn-dark{background:var(--navy2)}.btn-dark:hover{background:var(--navy)}
+.btn-tier{background:linear-gradient(135deg,#7c3aed,#6d28d9);box-shadow:0 2px 8px rgba(109,40,217,.3)}
+.btn-tier:hover{background:linear-gradient(135deg,#6d28d9,#5b21b6)}
 
 .main{padding:26px 32px;max-width:1640px;margin:0 auto}
 .sec-title{display:flex;align-items:center;gap:10px;margin:34px 0 16px}.sec-title:first-child{margin-top:0}
@@ -117,7 +118,7 @@ tr.total.row-ok td{background:#dcfce7}tr.total.row-mid td{background:#fef3c7}tr.
   <div class="header-logo">
     <div class="header-badge">📄</div>
     <div class="header-title">
-      <h1>LAPORAN PENGHANTARAN BORANG BE2026</h1>
+      <h1>LAPORAN MKO &amp; PENGHANTARAN BORANG BE2026</h1>
       <p>Rangka Kawalan Fasa 2 &amp; 3 &nbsp;·&nbsp; Hartanah (308) &amp; Runcit (337) &nbsp;·&nbsp; Unit Harga-Harga (UHH)</p>
     </div>
   </div>
@@ -133,6 +134,7 @@ tr.total.row-ok td{background:#dcfce7}tr.total.row-mid td{background:#fef3c7}tr.
   <div class="fgroup"><label>Penyelia</label><select id="f-penyelia" onchange="applyFilters()"><option value="">Semua</option></select></div>
   <div class="fgroup"><label>Sasaran %</label><input type="number" id="f-target" value="45" min="0" max="100" step="1" onchange="applyFilters()"></div>
   <div class="spacer"></div>
+  <a class="btn btn-tier" href="https://malikibe2026.github.io/TIER/" target="_blank" style="text-decoration:none">📊 Laporan Kes TIER</a>
   <a class="btn btn-dark" href="laporan.html" style="text-decoration:none">📊 Laporan Analisis</a>
   <a class="btn btn-dark" href="fe_tracker_details.html" style="text-decoration:none">🔎 FE Tracker</a>
   <a class="btn btn-dark" href="borang_f2_tracker.html" style="text-decoration:none">📍 Borang &amp; F2 Tracker</a>
@@ -182,7 +184,7 @@ tr.total.row-ok td{background:#dcfce7}tr.total.row-mid td{background:#fef3c7}tr.
 
   <div style="margin:4px 0 0;font-size:.8rem;color:var(--muted)">👤 Prestasi terperinci mengikut FE kini di <a href="fe_tracker_details.html" style="color:var(--blue2);font-weight:600;text-decoration:none">🔎 FE Tracker</a> &amp; <a href="borang_f2_tracker.html" style="color:var(--blue2);font-weight:600;text-decoration:none">📍 Borang &amp; F2 Tracker</a> — dipisahkan supaya dashboard ini ringan.</div>
 
-  <div class="dashboard-footer">Laporan Penghantaran Borang BE2026 · Unit Harga-Harga · data dimuat terus dari Google Sheet · paparan point-in-time</div>
+  <div class="dashboard-footer">Laporan MKO &amp; Penghantaran Borang BE2026 · Unit Harga-Harga · data dimuat terus dari Google Sheet · paparan point-in-time</div>
 </div>
 
 <div id="no-data" style="display:none;padding:40px 32px">
@@ -190,9 +192,7 @@ tr.total.row-ok td{background:#dcfce7}tr.total.row-mid td{background:#fef3c7}tr.
 </div>
 
 <script>
-/* ═══ PEMETAAN LAJUR (43 lajur) ═══ */
 const COL={FASA:0,NO_SIRI:1,PENYELIA:2,FE:3,L_KAWALAN:11,M_BATCHING:12,N_NO_BATCH:13,O_PROSESAN:14,P_RESP:15,Q_REKOD:16,DISTRICT:29,AP_SURVEI:41};
-/* Logik respon: 11=Kod 11 · 50=Kod 50 · 12–60=LK · 61–77=Kod B · kosong=Belum.  Siap = 11+50+LK */
 const DEFAULT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSUeV4tfzv1ErhjT3e3o7P1lRO42zXMBb76TBHmUDe7lFHqS313TRIxol6nboeQIqYBsxo4FQrBdP8u/pub?gid=998975185&single=true&output=csv';
 
 let rawRows=[],curRows=[],charts={};
@@ -202,7 +202,6 @@ if(window.Chart){
   Chart.register({id:'centerText',afterDraw(c,a,o){if(!o||!o.text)return;const ca=c.chartArea;const x=(ca.left+ca.right)/2,y=(ca.top+ca.bottom)/2;const ctx=c.ctx;ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=o.color||'#0a1628';ctx.font="700 "+(o.size||27)+"px 'Plus Jakarta Sans'";ctx.fillText(o.text,x,y-7);if(o.sub){ctx.font="600 11px 'Plus Jakarta Sans'";ctx.fillStyle='#64748b';ctx.fillText(o.sub,x,y+15);}ctx.restore();}});
 }
 
-/* ═══ UTILS ═══ */
 function fmt(n){return (n==null||isNaN(n))?'0':Number(n).toLocaleString('ms-MY');}
 function pct(a,b){return b?Math.round(a/b*100):0;}
 function sub(a,b){return `${fmt(a)} <span class="mini">(${pct(a,b)}%)</span>`;}
@@ -226,7 +225,6 @@ function daerahOf(r){let v=String(r[COL.DISTRICT]||'').trim();if(!v)return '(Tia
 function respCode(r){const m=String(r[COL.P_RESP]||'').match(/^\s*(\d+)/);return m?parseInt(m[1],10):null;}
 function respGroup(r){const c=respCode(r);if(c===null)return 'belum';if(c===11)return 'k11';if(c===50)return 'k50';if(c>=12&&c<=60)return 'lk';return 'kodb';}
 
-/* ═══ PARSE CSV ═══ */
 function parseCSV(text){
   const rows=[];let row=[],cur='',inQ=false;
   for(let i=0;i<text.length;i++){const c=text[i];
@@ -237,7 +235,6 @@ function parseCSV(text){
   return rows.slice(1).filter(r=>r.length>5&&r.some(x=>x&&x.trim()));
 }
 
-/* ═══ LOAD ═══ */
 async function loadData(){
   const url=document.getElementById('sheet-url').value.trim();
   if(!url){alert('Sila masukkan URL Google Sheet (CSV).');return;}
@@ -271,7 +268,6 @@ function applyFilters(){
   renderKPI(curRows);renderComposition(curRows);renderDaerah(curRows);renderTrends(curRows);renderOperasi(curRows);renderPenyelia(curRows);
 }
 
-/* ═══ STATS ═══ */
 function stats(rows){
   const s={total:rows.length,fe:new Set(),batch:new Set(),k11:0,k50:0,lk:0,kodb:0,belum:0,hartanah:0,runcit:0,
     kaw:{a:0,lk:0,b:0,t:0},bat:{a:0,lk:0,b:0,t:0},ter:{a:0,lk:0,b:0,t:0}};
@@ -286,7 +282,7 @@ function stats(rows){
     if(hasDate(r,COL.M_BATCHING)&&grp){s.bat.t++;s.bat[grp]++;}
     if(hasDate(r,COL.O_PROSESAN)&&grp){s.ter.t++;s.ter[grp]++;}
   });
-  s.siap=s.k11+s.k50+s.lk+s.kodb;   // Siap MKO = semua yang ada respon
+  s.siap=s.k11+s.k50+s.lk+s.kodb;
   return s;
 }
 function statusOf(capPct,target){
@@ -296,7 +292,6 @@ function statusOf(capPct,target){
 }
 function baki(siap,agihan,target){return Math.max(0,Math.round(target/100*agihan)-siap);}
 
-/* ═══ KPI ═══ */
 function renderKPI(rows){
   const s=stats(rows),t=s.total,tg=getTarget();
   const capai=pct(s.siap,t),bk=baki(s.siap,t,tg);
@@ -323,7 +318,6 @@ function renderKPI(rows){
       ${k.sub?`<div class="kpi-sub">${k.sub}</div>`:''}</div>`).join('');
 }
 
-/* ═══ OPERASI ═══ */
 function renderOperasi(rows){
   const s=stats(rows);
   const rs=[
@@ -337,7 +331,6 @@ function renderOperasi(rows){
     <tbody>${rs.map((r,i)=>`<tr ${i===3?'class="total"':''}><td>${r[0]}</td><td class="num">${fmt(r[4])}</td><td class="num">${sub(r[1],r[4])}</td><td class="num">${sub(r[2],r[4])}</td><td class="num">${sub(r[3],r[4])}</td></tr>`).join('')}</tbody>`;
 }
 
-/* ═══ CHARTS ═══ */
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 const PAL={k11:'#10b981',k50:'#f59e0b',lk:'#8b5cf6',kodb:'#06b6d4',belum:'#e2e8f0'};
 function donutOpts(extra){return{responsive:true,maintainAspectRatio:false,cutout:'58%',layout:{padding:4},
@@ -352,17 +345,14 @@ function doughnut(id,labels,data,colors,extra,cutout){
 function renderComposition(rows){
   const s=stats(rows),capai=pct(s.siap,s.total);
   doughnut('chart-siap',['Siap MKO','Belum Respon'],[s.siap,s.belum],['#10b981','#eef2f7'],{centerText:{text:capai+'%',sub:'Siap MKO'}},'72%');
-  /* Komposisi Siap MKO -> tonjol Kod 11 & 50 */
   const borang=s.k11+s.k50,pBor=pct(borang,s.siap);
   doughnut('chart-siap-komp',['Kod 11','Kod 50','LK','Kod B'],[s.k11,s.k50,s.lk,s.kodb],['#10b981','#f59e0b','#8b5cf6','#06b6d4'],{centerText:{text:pBor+'%',sub:'Borang 11+50'}},'66%');
-  /* Hantar Borang daripada Kod 11 & 50 (lajur Kawalan) */
-  const hantarB=s.kaw.a,belumHantarB=Math.max(0,borang-hantarB),pHan=pct(hantarB,borang);
+  const hantarB=s.kaw.a,belumHantarB=Math.max(0,(s.k11+s.k50)-hantarB),pHan=pct(hantarB,s.k11+s.k50);
   doughnut('chart-hantar',['Hantar Borang','Belum Hantar'],[hantarB,belumHantarB],['#2563eb','#eef2f7'],{centerText:{text:pHan+'%',sub:'Hantar'}},'72%');
-  /* Komposisi mengikut SEMUA kod respon (bar, kecuali Belum) */
   const cm={};
   rows.forEach(r=>{const c=respCode(r);if(c===null)return;const v=String(r[COL.P_RESP]||'').trim();if(!cm[c])cm[c]={n:0,txt:v};cm[c].n++;});
   const codes=Object.keys(cm).map(Number).sort((a,b)=>cm[b].n-cm[a].n);
-  const cLab=codes.map(c=>{let t=cm[c].txt.replace(/^\s*\d+\s*[-\u2013]\s*/,'').replace(/\s+/g,' ').trim();if(t.length>36)t=t.slice(0,35)+'\u2026';return c+' \u00b7 '+t;});
+  const cLab=codes.map(c=>{let t=cm[c].txt.replace(/^\s*\d+\s*[-–]\s*/,'').replace(/\s+/g,' ').trim();if(t.length>36)t=t.slice(0,35)+'…';return c+' · '+t;});
   const cCol=codes.map(c=>c===11?PAL.k11:c===50?PAL.k50:(c>=12&&c<=60)?PAL.lk:PAL.kodb);
   destroyChart('chart-resp-codes');
   const cvr=document.getElementById('chart-resp-codes');
@@ -385,7 +375,6 @@ function renderComposition(rows){
       scales:{x:{stacked:true,max:100,ticks:{font:{size:10},callback:v=>v+'%'},grid:{color:'#eef2f7'}},y:{stacked:true,grid:{display:false},ticks:{font:{size:11}}}}}});
 }
 
-/* ═══ DAERAH PENTADBIRAN ═══ */
 function renderDaerah(rows){
   const tg=getTarget();
   const m={};
@@ -420,7 +409,6 @@ function renderDaerah(rows){
     <tbody>${ent.map(([n,d])=>rowD(n,d,false)).join('')}${rowD('JUMLAH',T,true)}</tbody>`;
 }
 
-/* ═══ TRENDS ═══ */
 function trendByDate(rows,col){
   const map={};
   rows.forEach(r=>{const d=parseDate(r[col]);if(!d)return;const p=n=>String(n).padStart(2,'0');const k=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;map[k]=(map[k]||0)+1;});
@@ -441,7 +429,6 @@ function renderTrends(rows){
   emptyOrChart('chart-prosesan',pr,()=>({type:'line',data:{labels:pr.labels,datasets:[{label:'Terima',data:pr.data,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',tension:.4,fill:true,pointRadius:3}]},options:lineOpts()}));
 }
 
-/* ═══ PENYELIA ═══ */
 function groupAgg(rows,keyFn){
   const m={};
   rows.forEach(r=>{const k=keyFn(r);const o=(m[k]=m[k]||{fe:new Set(),agi:0,k11:0,k50:0,lk:0,kodb:0,belum:0,kaw:0});
@@ -467,7 +454,6 @@ function renderPenyelia(rows){
     <tbody>${ent.map(([n,d])=>rowHTML(n,d,false)).join('')}${rowHTML('JUMLAH',T,true)}</tbody>`;
 }
 
-/* ═══ DEMO ═══ */
 function generateDemo(){
   const fes=['QISTINA','HANA','NUAIM','ZAWANI','MAISARAH','IKHWAN','NAJWA','ALFIAN','AIMAN','AZIM','AINUDDIN','SYIMAH'];
   const pens=['nursyuzalawaty','suhaina.wahab','ahmadmaliki'];
