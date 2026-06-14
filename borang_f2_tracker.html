@@ -101,8 +101,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .fg select{cursor:pointer;min-width:120px;padding-right:28px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 10px center;-webkit-appearance:none;appearance:none
-}
+  background-repeat:no-repeat;background-position:right 10px center;-webkit-appearance:none;appearance:none}
 .fg select:focus,.fg input[type=text]:focus{
   outline:none;border-color:var(--blue2);
   box-shadow:0 0 0 3px rgba(37,99,235,.1),0 2px 8px rgba(37,99,235,.08)
@@ -486,6 +485,18 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
     </select>
   </div>
 
+  <!-- Status Respon -->
+  <div class="fg">
+    <label>Status Respon</label>
+    <select id="f-resp" onchange="apply()" style="max-width:240px"><option value="">Semua</option></select>
+  </div>
+
+  <!-- Status Rekod -->
+  <div class="fg">
+    <label>Status Rekod</label>
+    <select id="f-status" onchange="apply()" style="max-width:200px"><option value="">Semua</option></select>
+  </div>
+
   <!-- Keberadaan multi-select -->
   <div class="fg ms-wrap" id="ms-wrap">
     <label>Keberadaan</label>
@@ -560,8 +571,8 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
 
   <div class="sp"></div>
   <div class="urlw">
-    <input type="text" id="url" placeholder="URL CSV Google Sheets…">
-    <button class="btn" onclick="loadData()">⟳ Muat Data</button>
+    <input type="hidden" id="url">
+    <button class="btn" onclick="loadData()">⟳ Muat Semula</button>
   </div>
 </div>
 
@@ -578,7 +589,8 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
   <div class="note">
     📌 <b>Cara Baca:</b> <b>Keberadaan</b> menunjukkan peringkat terjauh borang —
     <b>Masih di FE</b> (belum hantar kawalan) → <b>Di Kawalan</b> → <b>Batching</b> → <b>Prosesan Terima</b>.
-    Guna penapis <b>Keberadaan</b> (boleh pilih lebih dari satu) untuk tapis mengikut peringkat, penapis <b>FE</b>
+    Guna penapis <b>Status Respon</b> &amp; <b>Status Rekod</b> untuk cari borang ikut kod respon / status semakan,
+    penapis <b>Keberadaan</b> (boleh pilih lebih dari satu) untuk peringkat, penapis <b>FE</b>
     untuk lihat status borang setiap pegawai, dan butang <b>Export</b> untuk muat turun senarai.
   </div>
 </div>
@@ -640,6 +652,7 @@ document.addEventListener('click',e=>{
 /* ===== HELPERS ===== */
 const fmt=n=>(n==null||isNaN(n))?'0':Number(n).toLocaleString('ms-MY');
 const pct=(a,b)=>b?Math.round(a/b*100):0;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 function penName(r){return String(r[COL.PENYELIA]||'').trim()||'(Tiada)';}
 function fasaOf(r){const v=String(r[COL.FASA]||'');if(/fasa\s*2/i.test(v))return '2';if(/fasa\s*3/i.test(v))return '3';return v.trim()||'(lain)';}
 function rcode(r){const m=String(r[COL.P_RESP]||'').match(/^\s*(\d+)/);return m?parseInt(m[1],10):null;}
@@ -683,6 +696,7 @@ function initData(rows){
     return {
       siri:id,nama,fe:String(r[COL.FE]||'').trim()||'—',pen:penName(r),
       fasa:fasaOf(r),code:c,codeLabel:(c==null?'—':String(c)),jenis:jenisOf(c),
+      resp:String(r[COL.P_RESP]||'').trim(),
       status:String(r[COL.Q_REKOD]||'').trim()||'—',stage:stageOf(r),
       noBatch:String(r[COL.N_NO_BATCH]||'').trim()||'—',
       tKaw:fmtDate(r[COL.L_KAWALAN])||'—',tBat:fmtDate(r[COL.M_BATCHING])||'—',tPros:fmtDate(r[COL.O_PROSESAN])||'—',
@@ -694,6 +708,19 @@ function initData(rows){
   populateFE();
   const batches=[...new Set(allRecs.map(r=>r.noBatch).filter(b=>b&&b!=='—'))].sort((a,b)=>a.localeCompare(b,'ms',{numeric:true}));
   document.getElementById('f-batch').innerHTML='<option value="">Semua</option>'+batches.map(b=>`<option>${b}</option>`).join('');
+  // Status Respon (ikut kod, menaik) — value=kod, label=teks penuh "NN-Keterangan"
+  const respMap=new Map();
+  allRecs.forEach(r=>{if(r.code!=null&&!respMap.has(r.code))respMap.set(r.code,r.resp||('Kod '+r.code));});
+  const respCodes=[...respMap.keys()].sort((a,b)=>a-b);
+  const hasBelum=allRecs.some(r=>r.code==null);
+  document.getElementById('f-resp').innerHTML='<option value="">Semua</option>'+
+    respCodes.map(c=>`<option value="${c}">${esc(respMap.get(c))}</option>`).join('')+
+    (hasBelum?'<option value="belum">(Belum Respon)</option>':'');
+  // Status Rekod — distinct, '(Tiada)' di hujung
+  const stats=[...new Set(allRecs.map(r=>r.status))];
+  stats.sort((a,b)=>a==='—'?1:b==='—'?-1:a.localeCompare(b,'ms',{numeric:true}));
+  document.getElementById('f-status').innerHTML='<option value="">Semua</option>'+
+    stats.map(s=>`<option value="${esc(s)}">${s==='—'?'(Tiada)':esc(s)}</option>`).join('');
   document.getElementById('upd').textContent=new Date().toLocaleString('ms-MY');
   document.getElementById('err').style.display='none';
   buildTable();
@@ -769,6 +796,8 @@ function scope(){
   const p=document.getElementById('f-pen').value;
   const fe=document.getElementById('f-fe').value;
   const b=document.getElementById('f-batch').value;
+  const resp=document.getElementById('f-resp').value;
+  const status=document.getElementById('f-status').value;
   const ms=getMSFilter();
   return allRecs.filter(r=>
     (!j||r.jenis===j)&&
@@ -776,6 +805,8 @@ function scope(){
     (!p||r.pen===p)&&
     (!fe||r.fe===fe)&&
     (!b||r.noBatch===b)&&
+    (!resp||(resp==='belum'?r.code==null:String(r.code)===resp))&&
+    (!status||r.status===status)&&
     (!ms||ms.includes(r.stage))
   );
 }
@@ -789,7 +820,11 @@ function renderPills(){
   const p=document.getElementById('f-pen');
   const fe=document.getElementById('f-fe');
   const b=document.getElementById('f-batch');
+  const rs=document.getElementById('f-resp');
+  const stt=document.getElementById('f-status');
   if(j.value)pills.push({label:'Jenis: '+j.options[j.selectedIndex].text,clear:()=>{j.value='';apply();}});
+  if(rs.value)pills.push({label:'Respon: '+rs.options[rs.selectedIndex].text,clear:()=>{rs.value='';apply();}});
+  if(stt.value)pills.push({label:'Rekod: '+stt.options[stt.selectedIndex].text,clear:()=>{stt.value='';apply();}});
   if(f.value)pills.push({label:'Fasa '+f.value,clear:()=>{f.value='';apply();}});
   if(p.value)pills.push({label:'Penyelia: '+p.value,clear:()=>{p.value='';onPen();}});
   if(fe.value)pills.push({label:'FE: '+fe.value,clear:()=>{fe.value='';apply();}});
