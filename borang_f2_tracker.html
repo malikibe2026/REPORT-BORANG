@@ -125,6 +125,41 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   transform:translateY(-2px);box-shadow:0 6px 18px rgba(37,99,235,.35)
 }
 
+/* ===== ADVANCED FILTER TOGGLE + PANEL ===== */
+.adv-toggle{
+  display:flex;align-items:center;gap:7px;
+  background:#fff;border:1.5px solid var(--border);border-radius:11px;
+  padding:0 14px;height:38px;font-size:.8rem;font-weight:700;color:var(--navy2);
+  font-family:var(--font);cursor:pointer;transition:all .2s;white-space:nowrap
+}
+.adv-toggle:hover{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.adv-toggle.open{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#bfdbfe;color:#1d4ed8}
+.adv-toggle .chev{transition:transform .25s;color:var(--slate)}
+.adv-toggle.open .chev{transform:rotate(180deg);color:#1d4ed8}
+.adv-toggle .acount{
+  background:var(--blue2);color:#fff;border-radius:20px;padding:1px 8px;
+  font-size:.68rem;font-weight:700;min-width:18px;text-align:center;line-height:1.5
+}
+.adv-panel{
+  display:none;background:linear-gradient(to bottom,#f6f9ff,#fff);
+  border-bottom:1px solid var(--border);padding:0 40px;
+  box-shadow:inset 0 4px 10px -8px rgba(10,22,40,.25)
+}
+.adv-panel.show{display:block;animation:advIn .22s ease}
+@keyframes advIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.adv-inner{display:flex;gap:13px 18px;align-items:center;flex-wrap:wrap;padding:14px 0}
+.adv-label{
+  font-size:.65rem;font-weight:800;color:var(--blue2);text-transform:uppercase;
+  letter-spacing:.08em;display:flex;align-items:center;gap:6px;
+  padding-right:14px;margin-right:2px;border-right:1.5px solid #dbe7fb
+}
+.btn-reset{
+  background:#fff;border:1.5px solid #fecaca;color:#dc2626;border-radius:11px;
+  padding:0 16px;height:38px;font-size:.76rem;font-weight:700;font-family:var(--font);
+  cursor:pointer;transition:all .2s;margin-left:auto;white-space:nowrap
+}
+.btn-reset:hover{background:#fef2f2;border-color:#f87171;transform:translateY(-1px)}
+
 /* ===== MULTI-SELECT KEBERADAAN ===== */
 .ms-wrap{position:relative}
 .ms-btn{
@@ -475,26 +510,16 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
 </div></div>
 
 <div class="filters">
-  <!-- Jenis -->
+<!-- Penyelia -->
   <div class="fg">
-    <label>Jenis</label>
-    <select id="f-jenis" onchange="apply()">
-      <option value="">Semua Rekod</option>
-      <option value="borang">Borang (11 & 50)</option>
-      <option value="f2">F2 / LK (12–60)</option>
-    </select>
+    <label>Penyelia</label>
+    <select id="f-pen" onchange="onPen()"><option value="">Semua</option></select>
   </div>
 
-  <!-- Status Respon -->
+  <!-- FE -->
   <div class="fg">
-    <label>Status Respon</label>
-    <select id="f-resp" onchange="apply()" style="max-width:240px"><option value="">Semua</option></select>
-  </div>
-
-  <!-- Status Rekod -->
-  <div class="fg">
-    <label>Status Rekod</label>
-    <select id="f-status" onchange="apply()" style="max-width:200px"><option value="">Semua</option></select>
+    <label>FE</label>
+    <select id="f-fe" onchange="apply()"><option value="">Semua</option></select>
   </div>
 
   <!-- Keberadaan multi-select -->
@@ -535,6 +560,51 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
     </div>
   </div>
 
+  <!-- Cari -->
+  <div class="fg">
+    <label>Cari</label>
+    <input type="text" id="f-q" placeholder="No ID / nama pendaftaran…" oninput="apply()">
+  </div>
+
+    <!-- Toggle Penapis Lanjutan -->
+  <button class="adv-toggle" id="adv-toggle" onclick="toggleAdv()">
+    ⚙ Penapis Lanjutan
+    <span class="acount" id="adv-count" style="display:none"></span>
+    <svg class="chev" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+  <div class="sp"></div>
+  <div class="urlw">
+    <input type="hidden" id="url">
+    <button class="btn" onclick="loadData()">⟳ Muat Semula</button>
+  </div>
+</div>
+
+<div class="adv-panel" id="adv-panel">
+  <div class="adv-inner">
+    <span class="adv-label">⚙ PENAPIS LANJUTAN</span>
+<!-- Jenis -->
+  <div class="fg">
+    <label>Jenis</label>
+    <select id="f-jenis" onchange="apply()">
+      <option value="">Semua Rekod</option>
+      <option value="borang">Borang (11 & 50)</option>
+      <option value="f2">F2 / LK (12–60)</option>
+    </select>
+  </div>
+
+  <!-- Status Respon -->
+  <div class="fg">
+    <label>Status Respon</label>
+    <select id="f-resp" onchange="apply()" style="max-width:240px"><option value="">Semua</option></select>
+  </div>
+
+  <!-- Status Rekod -->
+  <div class="fg">
+    <label>Status Rekod</label>
+    <select id="f-status" onchange="apply()" style="max-width:200px"><option value="">Semua</option></select>
+  </div>
+
   <!-- Fasa -->
   <div class="fg">
     <label>Fasa</label>
@@ -545,34 +615,13 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
     </select>
   </div>
 
-  <!-- Penyelia -->
-  <div class="fg">
-    <label>Penyelia</label>
-    <select id="f-pen" onchange="onPen()"><option value="">Semua</option></select>
-  </div>
-
-  <!-- FE -->
-  <div class="fg">
-    <label>FE</label>
-    <select id="f-fe" onchange="apply()"><option value="">Semua</option></select>
-  </div>
-
   <!-- No Batch -->
   <div class="fg">
     <label>No Batch</label>
     <select id="f-batch" onchange="apply()"><option value="">Semua</option></select>
   </div>
 
-  <!-- Cari -->
-  <div class="fg">
-    <label>Cari</label>
-    <input type="text" id="f-q" placeholder="No ID / nama pendaftaran…" oninput="apply()">
-  </div>
-
-  <div class="sp"></div>
-  <div class="urlw">
-    <input type="hidden" id="url">
-    <button class="btn" onclick="loadData()">⟳ Muat Semula</button>
+      <button class="btn-reset" onclick="resetAll()">↺ Reset Semua Penapis</button>
   </div>
 </div>
 
@@ -589,9 +638,9 @@ td.idcell{font-family:var(--mono);font-weight:600;color:var(--navy2);font-size:.
   <div class="note">
     📌 <b>Cara Baca:</b> <b>Keberadaan</b> menunjukkan peringkat terjauh borang —
     <b>Masih di FE</b> (belum hantar kawalan) → <b>Di Kawalan</b> → <b>Batching</b> → <b>Prosesan Terima</b>.
-    Guna penapis <b>Status Respon</b> &amp; <b>Status Rekod</b> untuk cari borang ikut kod respon / status semakan,
-    penapis <b>Keberadaan</b> (boleh pilih lebih dari satu) untuk peringkat, penapis <b>FE</b>
-    untuk lihat status borang setiap pegawai, dan butang <b>Export</b> untuk muat turun senarai.
+    Penapis utama (<b>Penyelia</b>, <b>FE</b>, <b>Keberadaan</b>, <b>Cari</b>) sentiasa dipaparkan; klik
+    <b>⚙ Penapis Lanjutan</b> untuk tapis ikut <b>Jenis</b>, <b>Status Respon</b>, <b>Status Rekod</b>, <b>Fasa</b> atau <b>No Batch</b>.
+    Klik kad ringkasan untuk tapis ikut peringkat, dan butang <b>Export</b> untuk muat turun senarai.
   </div>
 </div>
 
@@ -639,6 +688,30 @@ function updateMSBtn(){
   btn.classList.toggle('active',msSelected.size>0);
 }
 function getMSFilter(){return msSelected.size===0?null:[...msSelected];}
+
+/* ===== PENAPIS LANJUTAN ===== */
+function toggleAdv(){
+  const p=document.getElementById('adv-panel');
+  const t=document.getElementById('adv-toggle');
+  const open=p.classList.toggle('show');
+  t.classList.toggle('open',open);
+}
+function advCount(){
+  let n=0;
+  ['f-jenis','f-resp','f-status','f-fasa','f-batch'].forEach(id=>{const el=document.getElementById(id);if(el&&el.value)n++;});
+  const b=document.getElementById('adv-count');
+  if(!b)return;
+  if(n>0){b.textContent=n;b.style.display='inline-block';}
+  else{b.textContent='';b.style.display='none';}
+}
+function resetAll(){
+  ['f-jenis','f-resp','f-status','f-fasa','f-pen','f-fe','f-batch','f-q'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  msSelected.clear();
+  document.querySelectorAll('.ms-item').forEach(el=>el.classList.remove('checked'));
+  updateMSBtn();
+  populateFE();
+  apply();
+}
 
 /* close ms dropdown when clicking outside */
 document.addEventListener('click',e=>{
@@ -894,6 +967,7 @@ function apply(){
   document.getElementById('tk-cnt').textContent=fmt(data.length)+' rekod';
   dt.clear();dt.rows.add(data);dt.draw();
   renderPills();
+  advCount();
 }
 
 /* Card click — toggle stage in multi-select */
