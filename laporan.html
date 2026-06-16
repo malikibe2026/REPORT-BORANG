@@ -59,7 +59,7 @@ table.rt td.l{font-family:var(--font);white-space:normal}
 table.rt tbody tr:nth-child(even) td{background:#f7f9fd}
 table.rt tbody tr:hover td{background:#eef4ff}
 table.rt tr.tot td{background:#dde8fb;font-weight:800;color:var(--navy2);border-top:2px solid var(--navy2)}
-table.rt .hl{background:#2563eb!important;color:#fff;font-weight:700}
+table.rt .hl{background:linear-gradient(135deg,#047857,#10b981)!important;color:#fff;font-weight:800;text-shadow:0 1px 1px rgba(0,0,0,.18)}
 .rkno{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#e2e8f0;color:#334155;font-weight:800;font-size:.66rem;font-family:var(--font)}
 .pg{background:#dcfce7!important;color:#166534;font-weight:700}.pa{background:#fef9c3!important;color:#854d0e;font-weight:700}.pr{background:#fee2e2!important;color:#991b1b;font-weight:700}
 
@@ -105,6 +105,7 @@ table.rt .hl{background:#2563eb!important;color:#fff;font-weight:700}
   <label>Survei</label><select id="f-survei" onchange="render()"><option value="">Semua</option><option value="Hartanah">Hartanah</option><option value="Runcit">Runcit</option></select>
   <label>Daerah</label><select id="f-daerah" onchange="render()"><option value="">Semua</option></select>
   <label>Penyelia</label><select id="f-pen" onchange="render()"><option value="">Semua</option></select>
+  <label>Status Rekod</label><select id="f-status" onchange="render()"><option value="">Semua</option><option>Selesai</option><option>Semakan SMD</option><option>Dalam Proses</option><option>Pindaan</option><option>Belum Selesai</option></select>
   <label>Sasaran MKO%</label><input type="number" id="f-target" value="45" min="0" max="100" step="1" onchange="render()" style="width:62px;font-family:var(--font);text-align:center">
   <span class="sp"></span>
   <button class="btn alt" onclick="window.print()">🖨️ Simpan PDF</button>
@@ -120,7 +121,7 @@ table.rt .hl{background:#2563eb!important;color:#fff;font-weight:700}
 <script>
 const COL={FASA:0,NO_SIRI:1,PENYELIA:2,FE:3,L_KAWALAN:11,M_BATCHING:12,N_NO_BATCH:13,O_PROSESAN:14,P_RESP:15,Q_REKOD:16,DAERAH:29,PMKS:39,AP_SURVEI:41};
 const DEFAULT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSUeV4tfzv1ErhjT3e3o7P1lRO42zXMBb76TBHmUDe7lFHqS313TRIxol6nboeQIqYBsxo4FQrBdP8u/pub?gid=998975185&single=true&output=csv';
-const NPAGE=6;
+const NPAGE=9;
 let rawRows=[],curRows=[],charts={};
 
 const fmt=n=>(n==null||isNaN(n))?'0':Number(n).toLocaleString('ms-MY');
@@ -136,6 +137,9 @@ function pmksOf(r){return String(r[COL.PMKS]||'').trim()||'(Tiada)';}
 function rcode(r){const m=String(r[COL.P_RESP]||'').match(/^\s*(\d+)/);return m?parseInt(m[1],10):null;}
 function rgroup(r){const c=rcode(r);if(c===null)return 'belum';if(c===11)return 'k11';if(c===50)return 'k50';if(c>=12&&c<=60)return 'lk';return 'kodb';}
 function rekodOf(r){return String(r[COL.Q_REKOD]||'').trim();}
+const STATUSES=['Dalam Proses','Semakan SMD','Selesai','Pindaan','Belum Selesai'];
+const STCOLORS={'Dalam Proses':'#f59e0b','Semakan SMD':'#2563eb','Selesai':'#10b981','Pindaan':'#8b5cf6','Belum Selesai':'#94a3b8'};
+function statusOf(r){const t=String(r[COL.Q_REKOD]||'').trim().toLowerCase();if(!t)return 'Belum Selesai';if(t.includes('selesai'))return 'Selesai';if(t.includes('semak')||t.includes('smd'))return 'Semakan SMD';if(t.includes('proses'))return 'Dalam Proses';if(t.includes('pinda'))return 'Pindaan';return 'Belum Selesai';}
 const MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,mac:2,mei:4,ogo:7,ogos:7,dis:11};
 function pd(s){if(!s)return null;s=String(s).trim();if(!s)return null;let m=s.match(/^(\d{1,2})[-\/ ]([A-Za-z]{3,})[-\/ ](\d{2,4})$/);if(m){const d=+m[1],mo=MONTHS[m[2].slice(0,3).toLowerCase()];let y=+m[3];if(y<100)y+=2000;if(mo!=null)return new Date(y,mo,d);}m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);if(m){let y=+m[3];if(y<100)y+=2000;return new Date(y,+m[2]-1,+m[1]);}const d=new Date(s);return isNaN(d)?null:d;}
 function hasD(r,c){return pd(r[c])!==null;}
@@ -150,8 +154,8 @@ function showLoad(v){document.getElementById('load').style.display=v?'flex':'non
 function fillSel(id,vals){document.getElementById(id).innerHTML='<option value="">Semua</option>'+vals.map(p=>`<option>${p}</option>`).join('');}
 function initData(rows){rawRows=rows;fillSel('f-pen',[...new Set(rows.map(penName))].sort());fillSel('f-daerah',[...new Set(rows.map(daerahOf))].sort());document.getElementById('err').style.display='none';render();showLoad(false);}
 
-function scopeText(){const a=document.getElementById('f-fasa').value,b=document.getElementById('f-survei').value,d=document.getElementById('f-daerah').value,c=document.getElementById('f-pen').value;return [a?'Fasa '+a:null,b||null,d||null,c||null].filter(Boolean).join(' · ')||'Keseluruhan';}
-function applyScope(){const a=document.getElementById('f-fasa').value,b=document.getElementById('f-survei').value,d=document.getElementById('f-daerah').value,c=document.getElementById('f-pen').value;curRows=rawRows.filter(r=>(!a||fasaOf(r)===a)&&(!b||surveiOf(r)===b)&&(!d||daerahOf(r)===d)&&(!c||penName(r)===c));}
+function scopeText(){const a=document.getElementById('f-fasa').value,b=document.getElementById('f-survei').value,d=document.getElementById('f-daerah').value,c=document.getElementById('f-pen').value,e=document.getElementById('f-status').value;return [a?'Fasa '+a:null,b||null,d||null,c||null,e||null].filter(Boolean).join(' · ')||'Keseluruhan';}
+function applyScope(){const a=document.getElementById('f-fasa').value,b=document.getElementById('f-survei').value,d=document.getElementById('f-daerah').value,c=document.getElementById('f-pen').value,e=document.getElementById('f-status').value;curRows=rawRows.filter(r=>(!a||fasaOf(r)===a)&&(!b||surveiOf(r)===b)&&(!d||daerahOf(r)===d)&&(!c||penName(r)===c)&&(!e||statusOf(r)===e));}
 
 /* per-FE aggregate (shared) */
 function feAgg(rows){
@@ -173,7 +177,7 @@ function render(){
   window.__head=(sub,ic)=>`<div class="rpt-head"><div class="l"><div class="badge">${ic||'📄'}</div><div><h1>LAPORAN ANALISIS BE2026</h1><p>${sub}</p></div></div><div class="r"><div class="tag">DOSM SELANGOR · UHH</div><div>Skop: <span class="scope">${scope}</span></div><div>Kemaskini: ${today}</div></div></div>`;
   window.__foot=n=>`<div class="foot"><span>Laporan Analisis BE2026 · Unit Harga-Harga</span><span>Halaman ${n} / ${NPAGE}</span></div>`;
   document.getElementById('report').innerHTML =
-    pageFE()+pageHantarBorang()+pagePenyelia()+pageDaerah()+pagePMKS()+pageK5();
+    pageFE()+pageHantarBorang()+pagePenyelia()+pageDaerah()+pageStatusDaerah()+pagePMKS()+pageStatusPMKS()+pageK5()+pageStatusK5();
   drawCharts();
 }
 function P(inner){return `<div class="page">${inner}</div>`;}
@@ -309,7 +313,7 @@ function pagePMKS(){
     </div>
     <div class="grow"></div>
     <div class="note">PMKS = Perusahaan Mikro, Kecil &amp; Sederhana. "Besar" ialah syarikat di luar kategori PMKS. Siap MKO = Kod 11+50+LK+Kod B.</div>
-    ${__foot(5)}`);
+    ${__foot(6)}`);
 }
 
 /* ── 7 K5 ── */
@@ -326,7 +330,59 @@ function pageK5(){
     </div>
     <div class="grow"></div>
     <div class="note">Data K5 hanya wujud bagi borang yang telah direkod nilainya (kebanyakannya kes lengkap / Kod 11). "Pekerja" ialah bilangan orang — dipaparkan dalam jadual sahaja, bukan carta RM.</div>
-    ${__foot(6)}`);
+    ${__foot(8)}`);
+}
+
+/* ── STATUS OPERASI (Status Rekod) ── */
+function statusAgg(rows,keyFn){const m={};rows.forEach(x=>{const k=keyFn(x);const o=(m[k]=m[k]||{kes:0,'Dalam Proses':0,'Semakan SMD':0,'Selesai':0,'Pindaan':0,'Belum Selesai':0});o.kes++;o[statusOf(x)]++;});return m;}
+function statusTable(m,head1){
+  const ent=Object.entries(m).sort((a,b)=>b[1].kes-a[1].kes);
+  const T={kes:0,'Dalam Proses':0,'Semakan SMD':0,'Selesai':0,'Pindaan':0,'Belum Selesai':0};
+  ent.forEach(([,o])=>{T.kes+=o.kes;STATUSES.forEach(s=>T[s]+=o[s]);});
+  const row=(n,o,tot)=>`<tr class="${tot?'tot':''}"><td class="l">${n}</td><td>${fmt(o.kes)}</td>${STATUSES.map(s=>`<td>${fmt(o[s])}</td>`).join('')}<td class="hl">${pct(o['Selesai'],o.kes)}%</td></tr>`;
+  return `<div class="tw"><table class="rt"><thead><tr><th class="l">${head1}</th><th>Jumlah Kes</th>${STATUSES.map(s=>`<th>${s}</th>`).join('')}<th>% Selesai</th></tr></thead><tbody>${ent.map(([n,o])=>row(n,o,false)).join('')}${row('JUMLAH',T,true)}</tbody></table></div>`;
+}
+function mkStacked(id,labels,ent){const el=document.getElementById(id);if(!el)return;destroy(id);const ds=STATUSES.map(s=>({label:s,data:ent.map(([,o])=>o[s]),backgroundColor:STCOLORS[s]}));charts[id]=new Chart(el,{type:'bar',data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:'bottom',labels:{font:{size:9,family:"'Plus Jakarta Sans'"},boxWidth:10,padding:6}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:9}}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:9}}}}}});}
+
+function pageStatusDaerah(){
+  const m=statusAgg(curRows,daerahOf);
+  return P(__head('Status Operasi Mengikut Daerah · Dalam Proses · Semakan SMD · Selesai','🔄')+
+   `<div class="sec-h">🔄 Laporan Status Operasi Mengikut Daerah <small>(berdasarkan K7-Status Rekod)</small></div>
+    <div class="charts2">
+      <div>${statusTable(m,'Daerah')}</div>
+      <div class="cw"><h4>Komposisi Status Mengikut Daerah</h4><div class="chart-box"><canvas id="cStatDaerah"></canvas></div></div>
+    </div>
+    <div class="grow"></div>
+    <div class="note">Status Operasi diambil dari lajur <b>K7-Status Rekod</b>. % Selesai = rekod berstatus Selesai ÷ jumlah kes daerah. "Belum Selesai" = belum direkod / status selain di atas.</div>
+    ${__foot(5)}`);
+}
+function pageStatusPMKS(){
+  const m=statusAgg(curRows,pmksOf);
+  return P(__head('Status Operasi Mengikut Status PMKS','🔄')+
+   `<div class="sec-h">🔄 Laporan Status Operasi Mengikut PMKS <small>(Mikro · Kecil · Sederhana · Besar)</small></div>
+    <div class="charts2">
+      <div>${statusTable(m,'Status PMKS')}</div>
+      <div class="cw"><h4>Komposisi Status Mengikut PMKS</h4><div class="chart-box"><canvas id="cStatPmks"></canvas></div></div>
+    </div>
+    <div class="grow"></div>
+    <div class="note">Pecahan status operasi mengikut kategori PMKS. % Selesai = rekod Selesai ÷ jumlah kes.</div>
+    ${__foot(7)}`);
+}
+function pageStatusK5(){
+  const k5=[[17,'Hasil'],[18,'Belanja'],[19,'Gaji'],[20,'Pekerja'],[21,'Aset'],[22,'Stok']];
+  const m={};STATUSES.forEach(s=>m[s]={kes:0,ada:0,sums:[0,0,0,0,0,0]});
+  curRows.forEach(x=>{const s=statusOf(x);const o=m[s];o.kes++;let any=false;k5.forEach(([i],j)=>{const v=num(x[i]);if(v!==null){o.sums[j]+=v;any=true;}});if(any)o.ada++;});
+  const T={kes:0,ada:0,sums:[0,0,0,0,0,0]};STATUSES.forEach(s=>{T.kes+=m[s].kes;T.ada+=m[s].ada;m[s].sums.forEach((v,j)=>T.sums[j]+=v);});
+  const rr=(label,o,tot)=>`<tr class="${tot?'tot':''}"><td class="l">${label}</td><td>${fmt(o.kes)}</td><td>${fmt(o.ada)}</td><td>${rm(o.sums[0])}</td><td>${rm(o.sums[1])}</td><td>${rm(o.sums[2])}</td><td>${fmt(Math.round(o.sums[3]))}</td><td>${rm(o.sums[4])}</td><td>${rm(o.sums[5])}</td></tr>`;
+  return P(__head('Status Operasi Mengikut Data K5 · Nilai K5 ikut Status Rekod','🔄')+
+   `<div class="sec-h">🔄 Laporan Status Operasi × Data K5 <small>(jumlah nilai K5 mengikut status rekod)</small></div>
+    <div class="charts2">
+      <div class="tw"><table class="rt"><thead><tr><th class="l">Status Operasi</th><th>Bil Kes</th><th>Ada Data K5</th><th>Hasil</th><th>Belanja</th><th>Gaji</th><th>Pekerja</th><th>Aset</th><th>Stok</th></tr></thead><tbody>${STATUSES.map(s=>rr(s,m[s],false)).join('')}${rr('JUMLAH',T,true)}</tbody></table></div>
+      <div class="cw"><h4>Bil Kes Mengikut Status</h4><div class="chart-box"><canvas id="cStatK5"></canvas></div></div>
+    </div>
+    <div class="grow"></div>
+    <div class="note">Nilai K5 dijumlah mengikut Status Operasi. Data K5 kebanyakannya wujud bagi kes lengkap (Selesai / Kod 11), jadi status lain mungkin minima. "Pekerja" = bilangan orang.</div>
+    ${__foot(9)}`);
 }
 
 /* ── CHARTS ── */
@@ -338,6 +394,12 @@ function drawCharts(){
   mkDonut('cPmks',pEnt.map(e=>e[0]),pEnt.map(e=>e[1].kes),['#10b981','#2563eb','#f59e0b','#64748b','#8b5cf6']);
   const k5cols=[[17,'Hasil'],[18,'Belanja'],[19,'Gaji'],[21,'Aset'],[22,'Stok']];
   mkBar('cK5',k5cols.map(c=>c[1]),k5cols.map(([i])=>{let s=0;curRows.forEach(x=>{const v=num(x[i]);if(v!==null)s+=v;});return s;}),['#2563eb','#ef4444','#f59e0b','#8b5cf6','#06b6d4'],true);
+  const sdm=statusAgg(curRows,daerahOf);const sdE=Object.entries(sdm).sort((a,b)=>b[1].kes-a[1].kes);
+  mkStacked('cStatDaerah',sdE.map(e=>e[0]),sdE);
+  const spm=statusAgg(curRows,pmksOf);const spE=Object.entries(spm).sort((a,b)=>b[1].kes-a[1].kes);
+  mkStacked('cStatPmks',spE.map(e=>e[0]),spE);
+  const skm={};STATUSES.forEach(s=>skm[s]=0);curRows.forEach(x=>skm[statusOf(x)]++);
+  mkBar('cStatK5',STATUSES,STATUSES.map(s=>skm[s]),STATUSES.map(s=>STCOLORS[s]));
 }
 function mkBar(id,labels,data,colors,isRM){const el=document.getElementById(id);if(!el)return;destroy(id);charts[id]=new Chart(el,{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>(isRM?'RM ':'')+Number(c.raw).toLocaleString('ms-MY')}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>isRM?(v>=1e6?(v/1e6)+'jt':v>=1e3?(v/1e3)+'k':v):fmt(v)}}}}});}
 function mkDonut(id,labels,data,colors){const el=document.getElementById(id);if(!el)return;destroy(id);charts[id]=new Chart(el,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:'bottom',labels:{font:{family:"'Plus Jakarta Sans'",size:11}}}}}});}
